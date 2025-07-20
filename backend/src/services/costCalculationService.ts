@@ -85,8 +85,20 @@ export function calculateKubernetesCost(params: EstimationParams): CostBreakdown
   // Compute cost
   const computeCost = totalNodes * nodePrice;
   
-  // No request cost for Kubernetes
-  const requestCost = 0;
+  // ALB (Application Load Balancer) costs for Kubernetes
+  const albHourlyPrice = 0.0225; // $0.0225 per hour
+  const albMonthlyPrice = albHourlyPrice * 24 * 30; // Monthly cost
+  
+  // ALB request pricing
+  const albRequestPrice = 0.005 / 1000; // $0.005 per 1000 LCU-hours
+  
+  // Calculate LCU (Load Balancer Capacity Units) based on requests
+  // 1 LCU = 1 connection per second, 1 GB per hour, 1000 new connections per minute
+  const lcuForRequests = Math.ceil(requestsPerSecond / 25); // Assuming 25 requests per second per LCU
+  const lcuCost = lcuForRequests * albRequestPrice * 24 * 30;
+  
+  // Total request cost
+  const requestCost = albMonthlyPrice + lcuCost;
   
   // Network cost (estimate)
   const averageResponseSizeKb = 10; // Assumption

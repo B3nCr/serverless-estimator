@@ -94,10 +94,11 @@ const InfrastructureVisualization: React.FC<InfrastructureVisualizationProps> = 
               <p>Included in estimate:</p>
               <ul>
                 <li>EC2 instances for Kubernetes nodes</li>
-                <li>Load balancer costs</li>
+                <li>Application Load Balancer (ALB) costs</li>
+                <li>ALB capacity units based on request volume</li>
                 <li>Data transfer costs</li>
                 <li>EBS storage for nodes</li>
-                <li>Management overhead</li>
+                <li>EKS management fee</li>
               </ul>
             </div>
           )}
