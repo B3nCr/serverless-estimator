@@ -1,4 +1,5 @@
 import { ComparisonResult, CostBreakdown } from '../services/api';
+import InfrastructureVisualization from './InfrastructureVisualization';
 
 interface CostComparisonResultsProps {
   results: ComparisonResult;
@@ -60,6 +61,18 @@ const CostComparisonResults = ({ results }: CostComparisonResultsProps) => {
       <div className="cost-comparison">
         <CostBreakdownCard title="AWS Serverless" data={serverless} />
         <CostBreakdownCard title="Kubernetes" data={kubernetes} />
+      </div>
+      
+      <div className="infrastructure-visualizations">
+        <h2>Infrastructure Comparison</h2>
+        <p>Visual representation of the architectures included in this cost estimate:</p>
+        <div className="visualization-container">
+          <InfrastructureVisualization type="serverless" />
+          <InfrastructureVisualization type="kubernetes" />
+        </div>
+        <div className="visualization-note">
+          <small>Click "Show Details" to see what's included in each architecture estimate.</small>
+        </div>
       </div>
     </div>
   );
