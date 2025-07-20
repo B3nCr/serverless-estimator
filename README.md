@@ -4,13 +4,12 @@ This application compares the cost difference between AWS serverless architectur
 
 ## Project Structure
 
-- `packages/frontend/`: React + TypeScript client application built with Vite
-- `packages/backend/`: TypeScript backend service with containerization support
+- `frontend/`: React + TypeScript client application built with Vite
+- `backend/`: TypeScript backend service with containerization support
 
 ## Prerequisites
 
 - Node.js 16+
-- pnpm 7+
 - Docker (for containerized deployment)
 
 ## Getting Started
@@ -18,44 +17,41 @@ This application compares the cost difference between AWS serverless architectur
 ### Install Dependencies
 
 ```bash
-# Install pnpm if you don't have it
-npm install -g pnpm
-
 # Install project dependencies
-pnpm install
+npm install
 ```
 
 ### Development
 
 ```bash
 # Start both frontend and backend in development mode
-pnpm dev
+npm run dev
 
 # Start only frontend
-pnpm dev:frontend
+npm run dev:frontend
 
 # Start only backend
-pnpm dev:backend
+npm run dev:backend
 ```
 
 ### Testing
 
 ```bash
 # Run all tests
-pnpm test
+npm test
 
 # Run frontend tests
-pnpm --filter frontend test
+npm run test:frontend
 
 # Run backend tests
-pnpm --filter backend test
+npm run test:backend
 ```
 
 ### Building
 
 ```bash
 # Build all packages
-pnpm build
+npm run build
 ```
 
 ### Docker Deployment
@@ -71,14 +67,13 @@ docker-compose down
 ## Features
 
 - Compare costs between AWS serverless (Lambda + API Gateway) and Kubernetes architectures
-- Visualize cost breakdowns with interactive charts
+- Visualize cost breakdowns
 - Adjust parameters to see how they affect costs
 - Containerized deployment for easy hosting
 
 ## Technologies Used
 
-- Frontend: React, TypeScript, Vite, Recharts
+- Frontend: React, TypeScript, Vite
 - Backend: Node.js, Express, TypeScript
 - Testing: Vitest (frontend), Jest (backend)
 - Containerization: Docker, Docker Compose
-- Package Management: pnpm workspaces
