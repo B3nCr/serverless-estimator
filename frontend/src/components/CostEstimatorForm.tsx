@@ -15,14 +15,17 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     burstConcurrentRequests: 200,
     minRequestsPerMonth: 10000, // 10K
     maxRequestsPerMonth: 100000000, // 100M
-    dataPoints: 20
+    dataPoints: 20,
+    ec2InstanceType: 't3.medium',
+    nodeCount: 2,
+    overrideAutoScaling: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setParams({
       ...params,
-      [name]: name === 'region' ? value : Number(value)
+      [name]: ['region', 'ec2InstanceType'].includes(name) ? value : Number(value)
     });
   };
 
@@ -125,6 +128,58 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           min="1"
         />
       </div>
+      
+      <h3>Kubernetes Configuration</h3>
+      
+      <div className="form-group">
+        <label htmlFor="ec2InstanceType">EC2 Instance Type</label>
+        <select
+          id="ec2InstanceType"
+          name="ec2InstanceType"
+          value={params.ec2InstanceType}
+          onChange={handleChange}
+        >
+          <option value="t3.small">t3.small (2GB RAM)</option>
+          <option value="t3.medium">t3.medium (4GB RAM)</option>
+          <option value="t3.large">t3.large (8GB RAM)</option>
+          <option value="t3.xlarge">t3.xlarge (16GB RAM)</option>
+          <option value="m5.large">m5.large (8GB RAM)</option>
+          <option value="m5.xlarge">m5.xlarge (16GB RAM)</option>
+          <option value="m5.2xlarge">m5.2xlarge (32GB RAM)</option>
+          <option value="c5.large">c5.large (4GB RAM)</option>
+          <option value="c5.xlarge">c5.xlarge (8GB RAM)</option>
+          <option value="c5.2xlarge">c5.2xlarge (16GB RAM)</option>
+        </select>
+      </div>
+      
+      <div className="form-group checkbox-group">
+        <input
+          type="checkbox"
+          id="overrideAutoScaling"
+          name="overrideAutoScaling"
+          checked={params.overrideAutoScaling}
+          onChange={(e) => setParams({
+            ...params,
+            overrideAutoScaling: e.target.checked
+          })}
+        />
+        <label htmlFor="overrideAutoScaling">Override auto-scaling (specify fixed node count)</label>
+      </div>
+      
+      {params.overrideAutoScaling && (
+        <div className="form-group">
+          <label htmlFor="nodeCount">Number of Nodes</label>
+          <input
+            type="number"
+            id="nodeCount"
+            name="nodeCount"
+            value={params.nodeCount}
+            onChange={handleChange}
+            min="2"
+            required={params.overrideAutoScaling}
+          />
+        </div>
+      )}
 
       <button type="submit" disabled={isLoading}>
         {isLoading ? 'Calculating...' : 'Calculate Costs'}

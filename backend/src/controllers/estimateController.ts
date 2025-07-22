@@ -112,9 +112,23 @@ router.post('/chart', async (req: Request, res: Response) => {
       }
     }
     
+    // Get Kubernetes info from the middle point for reference
+    const midPointIndex = Math.floor(chartData.length / 2);
+    const midPointRequests = requestCounts[midPointIndex];
+    const midPointParams: EstimationParams = {
+      ...params,
+      requestsPerMonth: midPointRequests
+    };
+    
+    const kubernetesCost = calculateKubernetesCost(midPointParams);
+    
     const result: ChartComparisonResult = {
       dataPoints: chartData,
-      inflectionPoint
+      inflectionPoint,
+      kubernetesInfo: {
+        nodeCount: kubernetesCost.nodeCount,
+        instanceType: kubernetesCost.instanceType
+      }
     };
     
     res.json(result);

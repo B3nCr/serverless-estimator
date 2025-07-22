@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChartEstimationParams, generateChartData, CostChartDataPoint } from '../services/api';
+import { ChartEstimationParams, generateChartData, CostChartDataPoint, KubernetesCostBreakdown } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface CostComparisonChartProps {
@@ -30,6 +30,7 @@ const formatCurrency = (value: number): string => {
 const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
   const [chartData, setChartData] = useState<CostChartDataPoint[]>([]);
   const [inflectionPoint, setInflectionPoint] = useState<number | null>(null);
+  const [kubernetesInfo, setKubernetesInfo] = useState<{ nodeCount: number; instanceType: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +43,9 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
         const result = await generateChartData(params);
         setChartData(result.dataPoints);
         setInflectionPoint(result.inflectionPoint);
+        if (result.kubernetesInfo) {
+          setKubernetesInfo(result.kubernetesInfo);
+        }
       } catch (err) {
         setError('Failed to generate chart data');
         console.error(err);
@@ -74,6 +78,15 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
           <p>
             <strong>Inflection Point:</strong> At approximately {formatNumber(inflectionPoint)} requests per month, 
             serverless becomes more expensive than Kubernetes.
+          </p>
+        </div>
+      )}
+      
+      {kubernetesInfo && (
+        <div className="kubernetes-info">
+          <p>
+            <strong>Kubernetes Configuration:</strong> {kubernetesInfo.nodeCount} nodes of type {kubernetesInfo.instanceType}
+            {params.overrideAutoScaling ? ' (manually configured)' : ' (auto-scaled)'}
           </p>
         </div>
       )}

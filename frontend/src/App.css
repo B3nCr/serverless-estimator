@@ -287,3 +287,38 @@ button:disabled {
   color: #d32f2f;
   border-color: #d32f2f;
 }
+
+.kubernetes-info {
+  padding: 0.75rem;
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  margin-bottom: 1rem;
+}
+
+.node-info {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #ccc;
+}
+
+.node-info h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.node-info div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+}

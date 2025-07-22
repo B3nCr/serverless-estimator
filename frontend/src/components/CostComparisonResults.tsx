@@ -1,4 +1,4 @@
-import { ComparisonResult, CostBreakdown } from '../services/api';
+import { ComparisonResult, CostBreakdown, KubernetesCostBreakdown } from '../services/api';
 import InfrastructureVisualization from './InfrastructureVisualization';
 
 interface CostComparisonResultsProps {
@@ -17,7 +17,7 @@ const formatCurrency = (value: number): string => {
   }
 };
 
-const CostBreakdownCard = ({ title, data }: { title: string; data: CostBreakdown }) => {
+const CostBreakdownCard = ({ title, data }: { title: string; data: CostBreakdown | KubernetesCostBreakdown }) => {
   return (
     <div className="cost-card">
       <h3>{title}</h3>
@@ -47,6 +47,21 @@ const CostBreakdownCard = ({ title, data }: { title: string; data: CostBreakdown
           <span>{formatCurrency(data.totalCost)}</span>
         </div>
       </div>
+      
+      {/* Display node information for Kubernetes */}
+      {'nodeCount' in data && 'instanceType' in data && (
+        <div className="node-info">
+          <h4>Kubernetes Infrastructure</h4>
+          <div>
+            <span>Instance Type:</span>
+            <span>{data.instanceType}</span>
+          </div>
+          <div>
+            <span>Node Count:</span>
+            <span>{data.nodeCount}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

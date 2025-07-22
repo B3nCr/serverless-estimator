@@ -11,6 +11,11 @@ export interface EstimationParams {
   region?: string;
   concurrentRequests?: number;
   burstConcurrentRequests?: number;
+  
+  // Kubernetes specific overrides
+  ec2InstanceType?: string;
+  nodeCount?: number;
+  overrideAutoScaling?: boolean;
 }
 
 /**
@@ -30,6 +35,11 @@ export interface ChartEstimationParams {
   minRequestsPerMonth?: number;
   maxRequestsPerMonth?: number;
   dataPoints?: number;
+  
+  // Kubernetes specific overrides
+  ec2InstanceType?: string;
+  nodeCount?: number;
+  overrideAutoScaling?: boolean;
 }
 
 /**
@@ -64,6 +74,18 @@ export interface CostChartDataPoint {
   requestsPerMonth: number;
   serverlessCost: number;
   kubernetesCost: number;
+}
+
+/**
+ * Chart comparison result
+ */
+export interface ChartComparisonResult {
+  dataPoints: CostChartDataPoint[];
+  inflectionPoint: number | null;
+  kubernetesInfo?: {
+    nodeCount: number;
+    instanceType: string;
+  };
 }
 
 /**

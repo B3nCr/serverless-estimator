@@ -7,6 +7,9 @@ export interface EstimationParams {
   region?: string;
   concurrentRequests?: number;
   burstConcurrentRequests?: number;
+  ec2InstanceType?: string;
+  nodeCount?: number;
+  overrideAutoScaling?: boolean;
 }
 
 export interface ChartEstimationParams {
@@ -18,6 +21,9 @@ export interface ChartEstimationParams {
   minRequestsPerMonth?: number;
   maxRequestsPerMonth?: number;
   dataPoints?: number;
+  ec2InstanceType?: string;
+  nodeCount?: number;
+  overrideAutoScaling?: boolean;
 }
 
 export interface CostBreakdown {
@@ -30,9 +36,14 @@ export interface CostBreakdown {
   currency: string;
 }
 
+export interface KubernetesCostBreakdown extends CostBreakdown {
+  nodeCount: number;
+  instanceType: string;
+}
+
 export interface ComparisonResult {
   serverless: CostBreakdown;
-  kubernetes: CostBreakdown;
+  kubernetes: KubernetesCostBreakdown;
   difference: {
     amount: number;
     percentage: number;
@@ -48,6 +59,10 @@ export interface CostChartDataPoint {
 export interface ChartComparisonResult {
   dataPoints: CostChartDataPoint[];
   inflectionPoint: number | null;
+  kubernetesInfo?: {
+    nodeCount: number;
+    instanceType: string;
+  };
 }
 
 const API_URL = '/api';
