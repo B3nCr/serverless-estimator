@@ -14,6 +14,25 @@ export interface EstimationParams {
 }
 
 /**
+ * Parameters for cost comparison chart
+ */
+export interface ChartEstimationParams {
+  // Fixed parameters
+  averageRequestDurationMs: number;
+  averageMemoryMb: number;
+  
+  // Optional parameters with defaults
+  region?: string;
+  concurrentRequests?: number;
+  burstConcurrentRequests?: number;
+  
+  // Request range for chart
+  minRequestsPerMonth?: number;
+  maxRequestsPerMonth?: number;
+  dataPoints?: number;
+}
+
+/**
  * Cost breakdown for a specific architecture
  */
 export interface CostBreakdown {
@@ -36,4 +55,21 @@ export interface ComparisonResult {
     amount: number;
     percentage: number;
   };
+}
+
+/**
+ * Chart data point for cost comparison
+ */
+export interface CostChartDataPoint {
+  requestsPerMonth: number;
+  serverlessCost: number;
+  kubernetesCost: number;
+}
+
+/**
+ * Chart comparison result
+ */
+export interface ChartComparisonResult {
+  dataPoints: CostChartDataPoint[];
+  inflectionPoint: number | null; // The number of requests where serverless becomes more expensive
 }

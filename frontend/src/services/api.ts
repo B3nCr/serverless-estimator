@@ -9,6 +9,17 @@ export interface EstimationParams {
   burstConcurrentRequests?: number;
 }
 
+export interface ChartEstimationParams {
+  averageRequestDurationMs: number;
+  averageMemoryMb: number;
+  region?: string;
+  concurrentRequests?: number;
+  burstConcurrentRequests?: number;
+  minRequestsPerMonth?: number;
+  maxRequestsPerMonth?: number;
+  dataPoints?: number;
+}
+
 export interface CostBreakdown {
   computeCost: number;
   requestCost: number;
@@ -28,6 +39,17 @@ export interface ComparisonResult {
   };
 }
 
+export interface CostChartDataPoint {
+  requestsPerMonth: number;
+  serverlessCost: number;
+  kubernetesCost: number;
+}
+
+export interface ChartComparisonResult {
+  dataPoints: CostChartDataPoint[];
+  inflectionPoint: number | null;
+}
+
 const API_URL = '/api';
 
 /**
@@ -35,5 +57,13 @@ const API_URL = '/api';
  */
 export async function estimateCosts(params: EstimationParams): Promise<ComparisonResult> {
   const response = await axios.post(`${API_URL}/estimate`, params);
+  return response.data;
+}
+
+/**
+ * Generate chart data for cost comparison with varying request counts
+ */
+export async function generateChartData(params: ChartEstimationParams): Promise<ChartComparisonResult> {
+  const response = await axios.post(`${API_URL}/estimate/chart`, params);
   return response.data;
 }

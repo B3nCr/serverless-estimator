@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { EstimationParams } from '../services/api';
+import { EstimationParams, ChartEstimationParams } from '../services/api';
 
 interface CostEstimatorFormProps {
-  onSubmit: (params: EstimationParams) => void;
+  onSubmit: (params: ChartEstimationParams) => void;
   isLoading: boolean;
 }
 
 const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
-  const [params, setParams] = useState<EstimationParams>({
-    requestsPerMonth: 1000000, // 1 million requests
+  const [params, setParams] = useState<ChartEstimationParams>({
     averageRequestDurationMs: 100,
     averageMemoryMb: 128,
     region: 'us-east-1',
     concurrentRequests: 100,
-    burstConcurrentRequests: 200
+    burstConcurrentRequests: 200,
+    minRequestsPerMonth: 10000, // 10K
+    maxRequestsPerMonth: 100000000, // 100M
+    dataPoints: 20
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -32,14 +34,27 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="cost-form">
       <div className="form-group">
-        <label htmlFor="requestsPerMonth">Requests per Month</label>
+        <label htmlFor="minRequestsPerMonth">Min Requests per Month</label>
         <input
           type="number"
-          id="requestsPerMonth"
-          name="requestsPerMonth"
-          value={params.requestsPerMonth}
+          id="minRequestsPerMonth"
+          name="minRequestsPerMonth"
+          value={params.minRequestsPerMonth}
           onChange={handleChange}
-          min="1"
+          min="1000"
+          required
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="maxRequestsPerMonth">Max Requests per Month</label>
+        <input
+          type="number"
+          id="maxRequestsPerMonth"
+          name="maxRequestsPerMonth"
+          value={params.maxRequestsPerMonth}
+          onChange={handleChange}
+          min="10000"
           required
         />
       </div>

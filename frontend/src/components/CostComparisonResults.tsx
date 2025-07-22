@@ -6,7 +6,15 @@ interface CostComparisonResultsProps {
 }
 
 const formatCurrency = (value: number): string => {
-  return `$${value.toFixed(2)}`;
+  if (value < 0.01) {
+    return `$${value.toFixed(4)}`;
+  } else if (value < 1) {
+    return `$${value.toFixed(3)}`;
+  } else if (value < 10) {
+    return `$${value.toFixed(2)}`;
+  } else {
+    return `$${Math.round(value * 100) / 100}`;
+  }
 };
 
 const CostBreakdownCard = ({ title, data }: { title: string; data: CostBreakdown }) => {
