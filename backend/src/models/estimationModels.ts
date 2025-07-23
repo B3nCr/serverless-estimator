@@ -11,6 +11,7 @@ export interface EstimationParams {
   region?: string;
   concurrentRequests?: number;
   burstConcurrentRequests?: number;
+  apiGatewayType?: 'REST' | 'HTTP'; // API Gateway type (REST or HTTP)
   
   // Kubernetes specific overrides
   ec2InstanceType?: string;

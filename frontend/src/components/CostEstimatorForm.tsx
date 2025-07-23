@@ -13,6 +13,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     region: 'us-east-1',
     concurrentRequests: 100,
     burstConcurrentRequests: 200,
+    apiGatewayType: 'REST',
     minRequestsPerMonth: 10000, // 10K
     maxRequestsPerMonth: 100000000, // 100M
     dataPoints: 20,
@@ -25,7 +26,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     const { name, value } = e.target;
     setParams({
       ...params,
-      [name]: ['region', 'ec2InstanceType'].includes(name) ? value : Number(value)
+      [name]: ['region', 'ec2InstanceType', 'apiGatewayType'].includes(name) ? value : Number(value)
     });
   };
 
@@ -102,6 +103,19 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="us-west-2">US West (Oregon)</option>
           <option value="eu-west-1">EU (Ireland)</option>
           <option value="eu-central-1">EU (Frankfurt)</option>
+        </select>
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="apiGatewayType">API Gateway Type</label>
+        <select
+          id="apiGatewayType"
+          name="apiGatewayType"
+          value={params.apiGatewayType}
+          onChange={handleChange}
+        >
+          <option value="REST">REST API</option>
+          <option value="HTTP">HTTP API</option>
         </select>
       </div>
 

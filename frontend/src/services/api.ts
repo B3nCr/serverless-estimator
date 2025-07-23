@@ -7,6 +7,7 @@ export interface EstimationParams {
   region?: string;
   concurrentRequests?: number;
   burstConcurrentRequests?: number;
+  apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   nodeCount?: number;
   overrideAutoScaling?: boolean;
@@ -18,6 +19,7 @@ export interface ChartEstimationParams {
   region?: string;
   concurrentRequests?: number;
   burstConcurrentRequests?: number;
+  apiGatewayType?: 'REST' | 'HTTP';
   minRequestsPerMonth?: number;
   maxRequestsPerMonth?: number;
   dataPoints?: number;

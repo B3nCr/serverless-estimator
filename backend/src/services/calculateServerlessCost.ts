@@ -6,17 +6,21 @@ import { EstimationParams, CostBreakdown } from '../models/estimationModels';
 
 export function calculateServerlessCost(params: EstimationParams): CostBreakdown {
   const {
-    requestsPerMonth, averageRequestDurationMs, averageMemoryMb, region = 'us-east-1'
+    requestsPerMonth, averageRequestDurationMs, averageMemoryMb, region = 'us-east-1',
+    apiGatewayType = 'REST'
   } = params;
 
   // Lambda pricing (us-east-1 default)
   const lambdaPricePerGBSecond = 0.0000166667; // $0.0000166667 per GB-second
   const lambdaRequestPrice = 0.0000002; // $0.20 per million requests
 
-
-  // API Gateway pricing (REST API)
-  const apiGatewayRequestPrice = 0.0000035; // $3.50 per million requests
-
+  // API Gateway pricing
+  let apiGatewayRequestPrice: number;
+  if (apiGatewayType === 'HTTP') {
+    apiGatewayRequestPrice = 0.0000010; // $1.00 per million requests for HTTP API
+  } else {
+    apiGatewayRequestPrice = 0.0000035; // $3.50 per million requests for REST API
+  }
 
 
   // Calculate Lambda cost
@@ -36,11 +40,22 @@ export function calculateServerlessCost(params: EstimationParams): CostBreakdown
   const requestCost = lambdaRequestCost + apiGatewayRequestCost;
 
   // Network cost (estimate)
+  // Network cost (estimate)
   const averageResponseSizeKb = 10; // Assumption: 10KB response size
   const dataTransferGBPerRequest = averageResponseSizeKb / (1024 * 1024); // Convert KB to GB
   const dataTransferPrice = 0.09; // $0.09 per GB for first 10TB out
   const totalDataTransferGB = requestsPerMonth * dataTransferGBPerRequest;
-  const networkCost = totalDataTransferGB * dataTransferPrice;
+
+  // HTTP APIs include the first 1GB of data transfer for free
+  let networkCost = 0;
+  if (apiGatewayType === 'HTTP') {
+    // For HTTP APIs, first 1GB is free
+    const chargeableGB = Math.max(0, totalDataTransferGB - 1);
+    networkCost = chargeableGB * dataTransferPrice;
+  } else {
+    // For REST APIs, all data transfer is charged
+    networkCost = totalDataTransferGB * dataTransferPrice;
+  }
 
   // No storage cost for serverless
   const storageCost = 0;
