@@ -95,3 +95,8 @@ export interface ChartComparisonResult {
   dataPoints: CostChartDataPoint[];
   inflectionPoint: number | null; // The number of requests where serverless becomes more expensive
 }
+// Extended cost breakdown with node information
+export interface KubernetesCostBreakdown extends CostBreakdown {
+  nodeCount: number;
+  instanceType: string;
+}

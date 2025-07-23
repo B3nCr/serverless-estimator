@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { calculateServerlessCost, calculateKubernetesCost } from '../services/costCalculationService';
+import { calculateServerlessCost } from '../services/calculateServerlessCost';
+import { calculateKubernetesCost } from '../services/calculateKubernetesCost';
 import { EstimationParams, ChartEstimationParams, CostChartDataPoint, ChartComparisonResult } from '../models/estimationModels';
 
 const router = Router();

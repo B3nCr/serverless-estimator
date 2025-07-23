@@ -1,10 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { estimateRouter } from './estimateController';
-import * as costCalculationService from '../services/costCalculationService';
+// import * as costCalculationService from '../services/costCalculationService';
+import { calculateServerlessCost } from '../services/calculateServerlessCost';
+import { calculateKubernetesCost } from '../services/calculateKubernetesCost';
 import { EstimationParams, ChartEstimationParams } from '../models/estimationModels';
 
 // Mock the cost calculation service
-jest.mock('../services/costCalculationService');
+jest.mock('../services/calculateServerlessCost');
+jest.mock('../services/calculateKubernetesCost');
 
 describe('Estimate Controller', () => {
   let mockRequest: Partial<Request>;
@@ -37,13 +40,13 @@ describe('Estimate Controller', () => {
       };
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/');
 
       if (!route || !route.route) {
         throw new Error('Route not found');
-      } 
-        
+      }
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
@@ -83,22 +86,22 @@ describe('Estimate Controller', () => {
         instanceType: 't3.medium'
       };
 
-      (costCalculationService.calculateServerlessCost as jest.Mock).mockReturnValue(mockServerlessCost);
-      (costCalculationService.calculateKubernetesCost as jest.Mock).mockReturnValue(mockKubernetesCost);
+      (calculateServerlessCost as jest.Mock).mockReturnValue(mockServerlessCost);
+      (calculateKubernetesCost as jest.Mock).mockReturnValue(mockKubernetesCost);
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/');
-      
+
       if (!route || !route.route) {
         throw new Error('Route not found');
       }
-      
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
-      expect(costCalculationService.calculateServerlessCost).toHaveBeenCalledWith(testParams);
-      expect(costCalculationService.calculateKubernetesCost).toHaveBeenCalledWith(testParams);
+      expect(calculateServerlessCost).toHaveBeenCalledWith(testParams);
+      expect(calculateKubernetesCost).toHaveBeenCalledWith(testParams);
       expect(mockJson).toHaveBeenCalledWith({
         serverless: mockServerlessCost,
         kubernetes: mockKubernetesCost,
@@ -118,18 +121,18 @@ describe('Estimate Controller', () => {
         averageMemoryMb: 128
       };
 
-      (costCalculationService.calculateServerlessCost as jest.Mock).mockImplementation(() => {
+      (calculateServerlessCost as jest.Mock).mockImplementation(() => {
         throw new Error('Test error');
       });
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/');
-      
+
       if (!route || !route.route) {
         throw new Error('Route not found');
       }
-      
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
@@ -147,15 +150,15 @@ describe('Estimate Controller', () => {
       };
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/chart');
-      
+
       if (!route || !route.route) {
         throw new Error('Route not found');
       }
-      
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
-      
+
       // Assert
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({ error: 'Missing required parameters' });
@@ -171,7 +174,7 @@ describe('Estimate Controller', () => {
       mockRequest.body = testParams;
 
       // Mock cost calculation functions
-      (costCalculationService.calculateServerlessCost as jest.Mock).mockImplementation(
+      (calculateServerlessCost as jest.Mock).mockImplementation(
         (params) => ({
           computeCost: 10,
           requestCost: 20,
@@ -183,7 +186,7 @@ describe('Estimate Controller', () => {
         })
       );
 
-      (costCalculationService.calculateKubernetesCost as jest.Mock).mockImplementation(
+      (calculateKubernetesCost as jest.Mock).mockImplementation(
         (params) => ({
           computeCost: 50,
           requestCost: 10,
@@ -198,28 +201,28 @@ describe('Estimate Controller', () => {
       );
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/chart');
-      
+
       if (!route || !route.route) {
         throw new Error('Route not found');
       }
-      
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockJson).toHaveBeenCalled();
       const result = mockJson.mock.calls[0][0];
-      
+
       // Check structure
       expect(result).toHaveProperty('dataPoints');
       expect(result).toHaveProperty('inflectionPoint');
       expect(result).toHaveProperty('kubernetesInfo');
-      
+
       // Check data points
       expect(Array.isArray(result.dataPoints)).toBe(true);
       expect(result.dataPoints.length).toBe(20); // Default data points
-      
+
       // Check each data point has the right structure
       result.dataPoints.forEach((point: any) => {
         expect(point).toHaveProperty('requestsPerMonth');
@@ -236,18 +239,18 @@ describe('Estimate Controller', () => {
         averageMemoryMb: 128
       };
 
-      (costCalculationService.calculateServerlessCost as jest.Mock).mockImplementation(() => {
+      (calculateServerlessCost as jest.Mock).mockImplementation(() => {
         throw new Error('Test error');
       });
 
       // Act
-      const route = estimateRouter.stack.find(layer => 
+      const route = estimateRouter.stack.find(layer =>
         layer.route && layer.route.path === '/chart');
-      
+
       if (!route || !route.route) {
         throw new Error('Route not found');
       }
-      
+
       route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
