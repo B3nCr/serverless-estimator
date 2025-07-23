@@ -87,7 +87,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
   const eksClusterPrice = 0.10 * 24 * 30; // $0.10 per hour * 24 hours * 30 days
   
   // EC2 instance type configuration
-  const instanceTypes = {
+  const instanceTypes : {[key: string]: any } = {
     't3.small': { price: 0.0208, memory: 2 * 1024 },    // 2GB, $0.0208/hr
     't3.medium': { price: 0.0416, memory: 4 * 1024 },   // 4GB, $0.0416/hr
     't3.large': { price: 0.0832, memory: 8 * 1024 },    // 8GB, $0.0832/hr
