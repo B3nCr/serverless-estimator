@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { estimateRouter } from '../controllers/estimateController';
 import * as costCalculationService from '../services/costCalculationService';
 import { EstimationParams, ChartEstimationParams } from '../models/estimationModels';
@@ -9,12 +9,14 @@ jest.mock('../services/costCalculationService');
 describe('Estimate Controller', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
+  let mockNext: jest.Mock<NextFunction>;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
 
   beforeEach(() => {
     mockJson = jest.fn().mockReturnThis();
     mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+    mockNext = jest.fn();
     mockRequest = {
       body: {}
     };
@@ -28,7 +30,7 @@ describe('Estimate Controller', () => {
   });
 
   describe('POST /api/estimate', () => {
-    it('should return 400 if required parameters are missing', async () => {
+    it('should return 400 if required parameters are missing', () => {
       // Arrange
       mockRequest.body = {
         // Missing required parameters
@@ -42,14 +44,15 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       } 
         
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({ error: 'Missing required parameters' });
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should calculate and return cost comparison', async () => {
+    it('should calculate and return cost comparison', () => {
       // Arrange
       const testParams: EstimationParams = {
         requestsPerMonth: 1000000,
@@ -91,7 +94,7 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       }
       
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(costCalculationService.calculateServerlessCost).toHaveBeenCalledWith(testParams);
@@ -104,9 +107,10 @@ describe('Estimate Controller', () => {
           percentage: -65 // (35 - 100) / 100 * 100 = -65%
         }
       });
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should handle errors and return 500', async () => {
+    it('should handle errors and return 500', () => {
       // Arrange
       mockRequest.body = {
         requestsPerMonth: 1000000,
@@ -126,16 +130,17 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       }
       
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({ error: 'Failed to calculate costs' });
+      expect(mockNext).not.toHaveBeenCalled();
     });
   });
 
   describe('POST /api/estimate/chart', () => {
-    it('should return 400 if required parameters are missing', async () => {
+    it('should return 400 if required parameters are missing', () => {
       // Arrange
       mockRequest.body = {
         // Missing required parameters
@@ -149,14 +154,15 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       }
       
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
       
       // Assert
       expect(mockStatus).toHaveBeenCalledWith(400);
       expect(mockJson).toHaveBeenCalledWith({ error: 'Missing required parameters' });
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should generate chart data with default parameters', async () => {
+    it('should generate chart data with default parameters', () => {
       // Arrange
       const testParams: ChartEstimationParams = {
         averageRequestDurationMs: 100,
@@ -199,7 +205,7 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       }
       
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockJson).toHaveBeenCalled();
@@ -220,9 +226,10 @@ describe('Estimate Controller', () => {
         expect(point).toHaveProperty('serverlessCost');
         expect(point).toHaveProperty('kubernetesCost');
       });
+      expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('should handle errors and return 500', async () => {
+    it('should handle errors and return 500', () => {
       // Arrange
       mockRequest.body = {
         averageRequestDurationMs: 100,
@@ -241,11 +248,12 @@ describe('Estimate Controller', () => {
         throw new Error('Route not found');
       }
       
-      await route.route.stack[0].handle(mockRequest as Request, mockResponse as Response);
+      route.route.stack[0].handle(mockRequest as Request, mockResponse as Response, mockNext);
 
       // Assert
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({ error: 'Failed to calculate chart data' });
+      expect(mockNext).not.toHaveBeenCalled();
     });
   });
 });
