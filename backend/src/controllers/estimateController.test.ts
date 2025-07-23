@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { estimateRouter } from '../controllers/estimateController';
+import { estimateRouter } from './estimateController';
 import * as costCalculationService from '../services/costCalculationService';
 import { EstimationParams, ChartEstimationParams } from '../models/estimationModels';
 

@@ -5,7 +5,7 @@ import {
   ComparisonResult,
   CostChartDataPoint,
   ChartComparisonResult
-} from '../models/estimationModels';
+} from './estimationModels';
 
 describe('Estimation Models', () => {
   describe('EstimationParams', () => {

@@ -1,4 +1,4 @@
-import { calculateServerlessCost, calculateKubernetesCost } from '../services/costCalculationService';
+import { calculateServerlessCost, calculateKubernetesCost } from './costCalculationService';
 import { EstimationParams } from '../models/estimationModels';
 
 describe('Cost Calculation Service', () => {
