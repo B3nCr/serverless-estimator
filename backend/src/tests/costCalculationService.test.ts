@@ -12,7 +12,7 @@ describe('Cost Calculation Service', () => {
   };
 
   describe('calculateServerlessCost', () => {
-    it.only('should calculate serverless costs correctly', () => {
+    it('should calculate serverless costs correctly', () => {
       const result = calculateServerlessCost(testParams);
       
       // Verify result structure
