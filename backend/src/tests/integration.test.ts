@@ -86,7 +86,7 @@ describe('API Integration Tests', () => {
       expect(response.body.dataPoints.length).toBe(10); // As specified in request
       
       // Check each data point has the right structure
-      response.body.dataPoints.forEach(point => {
+      response.body.dataPoints.forEach((point: any) => {
         expect(point).toHaveProperty('requestsPerMonth');
         expect(point).toHaveProperty('serverlessCost');
         expect(point).toHaveProperty('kubernetesCost');

@@ -221,7 +221,7 @@ describe('Estimate Controller', () => {
       expect(result.dataPoints.length).toBe(20); // Default data points
       
       // Check each data point has the right structure
-      result.dataPoints.forEach(point => {
+      result.dataPoints.forEach((point: any) => {
         expect(point).toHaveProperty('requestsPerMonth');
         expect(point).toHaveProperty('serverlessCost');
         expect(point).toHaveProperty('kubernetesCost');
