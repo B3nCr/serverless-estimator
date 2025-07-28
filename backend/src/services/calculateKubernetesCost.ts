@@ -6,7 +6,7 @@ import { EstimationParams, KubernetesCostBreakdown } from '../models/estimationM
 
 export function calculateKubernetesCost(params: EstimationParams): KubernetesCostBreakdown {
   const {
-    requestsPerMonth, averageRequestDurationMs, averageMemoryMb, concurrentRequests = 100, burstConcurrentRequests = 200, region = 'us-east-1', ec2InstanceType, nodeCount, overrideAutoScaling = false
+    requestsPerMonth, averageRequestDurationMs, averageMemoryMb, burstConcurrentRequests = 200, region = 'us-east-1', ec2InstanceType, nodeCount, overrideAutoScaling = false
   } = params;
 
   // EKS pricing
@@ -41,15 +41,19 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     // Use user-specified node count
     totalNodes = nodeCount;
   } else {
-    // Calculate required nodes based on memory and concurrent requests
-    const requestsPerSecond = (requestsPerMonth / (30 * 24 * 60 * 60));
-    const peakRequestsPerSecond = Math.max(concurrentRequests, burstConcurrentRequests);
-
-    // Calculate nodes needed based on memory requirements
-    const nodesForMemory = Math.ceil((peakRequestsPerSecond * averageMemoryMb) / memoryPerNode);
-
-    // Add minimum 2 nodes for high availability
-    totalNodes = Math.max(2, nodesForMemory);
+    // Calculate sustained load requirements
+    const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
+    
+    // Calculate memory needed for sustained load
+    const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
+    const nodesForSustained = Math.ceil(sustainedMemoryMb / memoryPerNode);
+    
+    // Calculate memory needed for burst capacity
+    const burstMemoryMb = (burstConcurrentRequests || 0) * averageMemoryMb;
+    const nodesForBurst = Math.ceil(burstMemoryMb / memoryPerNode);
+    
+    // Use the higher of sustained or burst requirements, minimum 2 for HA
+    totalNodes = Math.max(2, nodesForSustained, nodesForBurst);
   }
 
   // Compute cost
@@ -62,8 +66,6 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
 
   // ALB request pricing
   const albRequestPrice = 0.005 / 1000; // $0.005 per 1000 LCU-hours
-
-
 
   // Calculate LCU (Load Balancer Capacity Units) based on requests
   // 1 LCU = 1 connection per second, 1 GB per hour, 1000 new connections per minute

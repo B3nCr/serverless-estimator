@@ -9,7 +9,6 @@ export interface EstimationParams {
   
   // Optional parameters with defaults
   region?: string;
-  concurrentRequests?: number;
   burstConcurrentRequests?: number;
   apiGatewayType?: 'REST' | 'HTTP'; // API Gateway type (REST or HTTP)
   
@@ -29,7 +28,6 @@ export interface ChartEstimationParams {
   
   // Optional parameters with defaults
   region?: string;
-  concurrentRequests?: number;
   burstConcurrentRequests?: number;
   
   // Request range for chart
@@ -74,7 +72,8 @@ export interface ComparisonResult {
 export interface CostChartDataPoint {
   requestsPerMonth: number;
   serverlessCost: number;
-  kubernetesCost: number;
+  kubernetesCost: number;  
+  kubernetesNodeCount: number;
 }
 
 /**

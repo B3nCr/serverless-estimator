@@ -8,7 +8,6 @@ describe('Cost Calculation Service', () => {
     averageRequestDurationMs: 100,
     averageMemoryMb: 128,
     region: 'us-east-1',
-    concurrentRequests: 50,
     burstConcurrentRequests: 100
   };
 
@@ -110,7 +109,7 @@ describe('Cost Calculation Service', () => {
         requestsPerMonth: 10000,
         averageRequestDurationMs: 50,
         averageMemoryMb: 64,
-        concurrentRequests: 5
+        burstConcurrentRequests: 5
       };
       
       const result = calculateKubernetesCost(lowParams);
@@ -198,7 +197,6 @@ describe('Cost Calculation Service', () => {
         requestsPerMonth: 100000000, // 100M requests
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
-        concurrentRequests: 1000,
         burstConcurrentRequests: 2000
       };
       

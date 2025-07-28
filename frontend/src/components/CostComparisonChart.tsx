@@ -38,7 +38,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
     const fetchChartData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         const result = await generateChartData(params);
         setChartData(result.dataPoints);
@@ -72,16 +72,16 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
   return (
     <div className="cost-chart-container">
       <h3>Cost Comparison by Request Volume</h3>
-      
+
       {inflectionPoint && (
         <div className="inflection-point-info">
           <p>
-            <strong>Inflection Point:</strong> At approximately {formatNumber(inflectionPoint)} requests per month, 
+            <strong>Inflection Point:</strong> At approximately {formatNumber(inflectionPoint)} requests per month,
             serverless becomes more expensive than Kubernetes.
           </p>
         </div>
       )}
-      
+
       {kubernetesInfo && (
         <div className="kubernetes-info">
           <p>
@@ -90,7 +90,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
           </p>
         </div>
       )}
-      
+
       <div className="chart-wrapper" style={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
           <LineChart
@@ -98,45 +98,55 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="requestsPerMonth" 
+            <XAxis
+              dataKey="requestsPerMonth"
               scale="log"
               domain={['auto', 'auto']}
               tickFormatter={formatNumber}
               label={{ value: 'Requests per Month', position: 'insideBottom', offset: -5 }}
             />
-            <YAxis 
+            <YAxis
               tickFormatter={(value) => `$${value}`}
               label={{ value: 'Monthly Cost (USD)', angle: -90, position: 'insideLeft' }}
             />
-            <Tooltip 
+            {/* <Tooltip
               formatter={(value: number) => formatCurrency(value)}
               labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
+            /> */}
+            <Tooltip
+              formatter={(value: number, name: string, props: any) => {
+                if (name === 'kubernetesCost') {
+                  return [formatCurrency(value) + ` (${props.payload.kubernetesNodeCount} nodes)`, 'Kubernetes'];
+                }
+                return formatCurrency(value);
+              }}
+              labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
             />
+
             <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="serverlessCost" 
-              name="AWS Serverless" 
-              stroke="#ff9900" 
-              activeDot={{ r: 8 }} 
+            <Line
+              type="monotone"
+              dataKey="serverlessCost"
+              name="AWS Serverless"
+              stroke="#ff9900"
+              activeDot={{ r: 8 }}
               strokeWidth={2}
             />
-            <Line 
-              type="monotone" 
-              dataKey="kubernetesCost" 
-              name="Kubernetes" 
-              stroke="#326ce5" 
-              activeDot={{ r: 8 }} 
+            <Line
+              type="monotone"
+              dataKey="kubernetesCost"
+              name="Kubernetes"
+              stroke="#326ce5"
+              activeDot={{ r: 8 }}
               strokeWidth={2}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
+
       <div className="chart-note">
         <small>
-          Note: This chart uses a logarithmic scale for request volume to better visualize the cost differences 
+          Note: This chart uses a logarithmic scale for request volume to better visualize the cost differences
           across a wide range of request volumes.
         </small>
       </div>

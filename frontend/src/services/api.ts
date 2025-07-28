@@ -5,7 +5,6 @@ export interface EstimationParams {
   averageRequestDurationMs: number;
   averageMemoryMb: number;
   region?: string;
-  concurrentRequests?: number;
   burstConcurrentRequests?: number;
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
@@ -17,7 +16,6 @@ export interface ChartEstimationParams {
   averageRequestDurationMs: number;
   averageMemoryMb: number;
   region?: string;
-  concurrentRequests?: number;
   burstConcurrentRequests?: number;
   apiGatewayType?: 'REST' | 'HTTP';
   minRequestsPerMonth?: number;
@@ -56,6 +54,7 @@ export interface CostChartDataPoint {
   requestsPerMonth: number;
   serverlessCost: number;
   kubernetesCost: number;
+  kubernetesNodeCount: number;
 }
 
 export interface ChartComparisonResult {

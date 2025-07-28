@@ -11,7 +11,6 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     averageRequestDurationMs: 100,
     averageMemoryMb: 128,
     region: 'us-east-1',
-    concurrentRequests: 100,
     burstConcurrentRequests: 200,
     apiGatewayType: 'REST',
     minRequestsPerMonth: 10000, // 10K
@@ -117,18 +116,6 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="REST">REST API</option>
           <option value="HTTP">HTTP API</option>
         </select>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="concurrentRequests">Average Concurrent Requests</label>
-        <input
-          type="number"
-          id="concurrentRequests"
-          name="concurrentRequests"
-          value={params.concurrentRequests}
-          onChange={handleChange}
-          min="1"
-        />
       </div>
 
       <div className="form-group">

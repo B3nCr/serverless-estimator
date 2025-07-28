@@ -83,7 +83,8 @@ router.post('/chart', async (req: Request, res: Response) => {
       chartData.push({
         requestsPerMonth,
         serverlessCost: serverlessCost.totalCost,
-        kubernetesCost: kubernetesCost.totalCost
+        kubernetesCost: kubernetesCost.totalCost,
+        kubernetesNodeCount: kubernetesCost.nodeCount 
       });
       
       // Check for inflection point (where serverless becomes more expensive)
