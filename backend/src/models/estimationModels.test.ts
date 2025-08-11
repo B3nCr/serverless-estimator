@@ -15,7 +15,6 @@ describe('Estimation Models', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        concurrentRequests: 50,
         burstConcurrentRequests: 100,
         ec2InstanceType: 't3.medium',
         nodeCount: 2,
@@ -29,7 +28,6 @@ describe('Estimation Models', () => {
       
       // Verify optional properties
       expect(params.region).toBe('us-east-1');
-      expect(params.concurrentRequests).toBe(50);
       expect(params.burstConcurrentRequests).toBe(100);
       expect(params.ec2InstanceType).toBe('t3.medium');
       expect(params.nodeCount).toBe(2);
@@ -50,7 +48,6 @@ describe('Estimation Models', () => {
       
       // Optional properties should be undefined
       expect(params.region).toBeUndefined();
-      expect(params.concurrentRequests).toBeUndefined();
       expect(params.burstConcurrentRequests).toBeUndefined();
       expect(params.ec2InstanceType).toBeUndefined();
       expect(params.nodeCount).toBeUndefined();
@@ -64,7 +61,6 @@ describe('Estimation Models', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        concurrentRequests: 50,
         burstConcurrentRequests: 100,
         minRequestsPerMonth: 10000,
         maxRequestsPerMonth: 1000000,
@@ -149,7 +145,8 @@ describe('Estimation Models', () => {
       const dataPoint: CostChartDataPoint = {
         requestsPerMonth: 1000000,
         serverlessCost: 175,
-        kubernetesCost: 270
+        kubernetesCost: 270,
+        kubernetesNodeCount: 2
       };
       
       // Verify properties
@@ -166,17 +163,20 @@ describe('Estimation Models', () => {
           {
             requestsPerMonth: 10000,
             serverlessCost: 10,
-            kubernetesCost: 100
+            kubernetesCost: 100,
+            kubernetesNodeCount: 2
           },
           {
             requestsPerMonth: 100000,
             serverlessCost: 100,
-            kubernetesCost: 150
+            kubernetesCost: 150,
+            kubernetesNodeCount: 2
           },
           {
             requestsPerMonth: 1000000,
             serverlessCost: 1000,
-            kubernetesCost: 300
+            kubernetesCost: 300,
+            kubernetesNodeCount: 2
           }
         ],
         inflectionPoint: 500000,
@@ -199,7 +199,8 @@ describe('Estimation Models', () => {
           {
             requestsPerMonth: 10000,
             serverlessCost: 10,
-            kubernetesCost: 100
+            kubernetesCost: 100,
+            kubernetesNodeCount: 2
           }
         ],
         inflectionPoint: null
