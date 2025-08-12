@@ -109,21 +109,24 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
               tickFormatter={(value) => `$${value}`}
               label={{ value: 'Monthly Cost (USD)', angle: -90, position: 'insideLeft' }}
             />
-            {/* <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
-              labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
-            /> */}
             <Tooltip
               formatter={(value: number, name: string, props: any) => {
-                if (name === 'kubernetesCost') {
-                  return [formatCurrency(value) + ` (${props.payload.kubernetesNodeCount} nodes)`, 'Kubernetes'];
+                if (name === "Kubernetes Node Count") {
+                  return `${value} nodes`
                 }
-                return formatCurrency(value);
+                return name + formatCurrency(value);
               }}
               labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
             />
 
             <Legend />
+            <Line type="monotone"
+              dataKey="kubernetesNodeCount"
+              name="Kubernetes Node Count"
+              stroke="#ff5500"
+              activeDot={{ r: 8 }}
+              strokeWidth={2}
+            />
             <Line
               type="monotone"
               dataKey="serverlessCost"
