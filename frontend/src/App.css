@@ -334,7 +334,6 @@ button:disabled {
 .docs-toggle {
   width: 100%;
   text-align: left;
-  /* background-color: #f8f9fa; */
   border: none;
   padding: 1rem;
   font-size: 1rem;
@@ -346,9 +345,6 @@ button:disabled {
   margin: 0;
 }
 
-.docs-toggle:hover {
-  /* background-color: #e9ecef; */
-}
 
 .docs-content {
   padding: 1.5rem;
