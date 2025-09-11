@@ -96,29 +96,29 @@ describe('calculateKubernetesCost', () => {
 
     it('should scale the node count with requests and memory usage', () => {
         const params: EstimationParams = {
-            requestsPerMonth: 2592000, // 1 req/sec sustained
+            requestsPerMonth: 2592000 * 10, // 10 req/sec sustained
             averageRequestDurationMs: 1000,
             averageMemoryMb: 512,
-            ec2InstanceType: 't3.medium', // 4GB memory
+            ec2InstanceType: 't3.small', // 2GB memory
             burstConcurrentRequests: 1
         };
 
         const result = calculateKubernetesCost(params);
-        // Expected: 1 req/sec * 512MB * 1s = 512MB sustained
-        // t3.medium has 4096MB, so 1 node needed, but minimum is 2
-        debugger;
-        expect(result.nodeCount).toBe(2)
+        // Expected: 10 req/sec * 512MB * 1s = 5120MB sustained
+        // t3.small has 2048, so 3 nodes needed
+        expect(result.nodeCount).toBe(3)
 
         const params2: EstimationParams = {
-            requestsPerMonth: 100000,
-            averageRequestDurationMs: 500,
-            averageMemoryMb: 256,
-            burstConcurrentRequests: 20,
-            ec2InstanceType: 't3.small' // 2GB memory
+            requestsPerMonth: 2592000 * 100, // 10 req/sec sustained
+            averageRequestDurationMs: 1000,
+            averageMemoryMb: 512,
+            ec2InstanceType: 't3.small', // 2GB memory
+            burstConcurrentRequests: 1
         };
-        debugger;
         const result2m = calculateKubernetesCost(params2);
-        expect(result2m.nodeCount).toBe(3)
+
+        // Half as much memory so expect 
+        expect(result2m.nodeCount).toBe(25)
     })
 
     it('should scale network costs with request count', () => {
