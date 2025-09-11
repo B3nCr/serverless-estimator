@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import CostEstimatorForm from './components/CostEstimatorForm'
 import CostComparisonChart from './components/CostComparisonChart'
+import CostCalculationDocs from './components/CostCalculationDocs'
 import { ChartEstimationParams } from './services/api'
 
 function App() {
@@ -31,6 +32,8 @@ function App() {
         and Kubernetes architecture across different request volumes. Find the inflection point 
         where serverless becomes more expensive than Kubernetes.
       </p>
+      
+      <CostCalculationDocs />
       
       <CostEstimatorForm onSubmit={handleEstimate} isLoading={loading} />
       
