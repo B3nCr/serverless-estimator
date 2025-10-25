@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EstimationParams, ChartEstimationParams } from '../services/api';
+import { ChartEstimationParams } from '../services/api';
 
 interface CostEstimatorFormProps {
   onSubmit: (params: ChartEstimationParams) => void;

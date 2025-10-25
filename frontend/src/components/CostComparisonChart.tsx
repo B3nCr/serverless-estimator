@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChartEstimationParams, generateChartData, CostChartDataPoint, KubernetesCostBreakdown } from '../services/api';
+import { ChartEstimationParams, generateChartData, CostChartDataPoint } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface CostComparisonChartProps {
@@ -110,7 +110,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
               label={{ value: 'Monthly Cost (USD)', angle: -90, position: 'insideLeft' }}
             />
             <Tooltip
-              formatter={(value: number, name: string, props: any) => {
+              formatter={(value: number, name: string, _: any) => {
                 if (name === "Kubernetes Node Count") {
                   return `${value} nodes`
                 }
