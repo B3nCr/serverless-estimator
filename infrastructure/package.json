@@ -5,9 +5,6 @@
     "infrastructure": "bin/infrastructure.js"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "test": "jest",
     "cdk": "cdk",
     "build-backend": "cd ../backend && npm run build:lambda",
     "deploy": "npm run build-backend && cdk deploy",
