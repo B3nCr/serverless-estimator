@@ -15,8 +15,7 @@ export interface EstimationParams {
   
   // Kubernetes specific overrides
   ec2InstanceType?: string;
-  nodeCount?: number;
-  overrideAutoScaling?: boolean;
+  minimumNodes?: number;
 }
 
 /**
@@ -29,8 +28,7 @@ export interface ChartEstimationParams {
   peakMultiplier?: number;
   workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   ec2InstanceType?: string;
-  nodeCount?: number;
-  overrideAutoScaling?: boolean;
+  minimumNodes?: number;
 }
 
 /**

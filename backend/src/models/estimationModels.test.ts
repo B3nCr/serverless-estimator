@@ -17,8 +17,7 @@ describe('Estimation Models', () => {
         region: 'us-east-1',
         peakMultiplier: 3,
         ec2InstanceType: 't3.medium',
-        nodeCount: 2,
-        overrideAutoScaling: false
+        minimumNodes: 3,
       };
 
       // Verify required properties
@@ -30,8 +29,7 @@ describe('Estimation Models', () => {
       expect(params.region).toBe('us-east-1');
       expect(params.peakMultiplier).toBe(3);
       expect(params.ec2InstanceType).toBe('t3.medium');
-      expect(params.nodeCount).toBe(2);
-      expect(params.overrideAutoScaling).toBe(false);
+      expect(params.minimumNodes).toBe(3);
     });
     
     it('should allow creating params with only required properties', () => {
@@ -50,8 +48,7 @@ describe('Estimation Models', () => {
       expect(params.region).toBeUndefined();
       expect(params.peakMultiplier).toBeUndefined();
       expect(params.ec2InstanceType).toBeUndefined();
-      expect(params.nodeCount).toBeUndefined();
-      expect(params.overrideAutoScaling).toBeUndefined();
+      expect(params.minimumNodes).toBeUndefined();
     });
   });
   
@@ -63,8 +60,7 @@ describe('Estimation Models', () => {
         region: 'us-east-1',
         peakMultiplier: 3,
         ec2InstanceType: 't3.medium',
-        nodeCount: 2,
-        overrideAutoScaling: false
+        minimumNodes: 3,
       };
 
       // Verify required properties

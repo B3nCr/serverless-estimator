@@ -41,8 +41,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     workloadProfile = 'standard',
     region = 'us-east-1',
     ec2InstanceType,
-    nodeCount,
-    overrideAutoScaling = false
+    minimumNodes = 2,
   } = params;
 
   // EKS pricing
@@ -79,24 +78,16 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
   const nodePrice = instanceConfig.price * 24 * 30; // hourly price * 24 hours * 30 days
   const memoryPerNode = instanceConfig.memory; // Memory in MB
 
-  let totalNodes;
+  const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
 
-  if (overrideAutoScaling && nodeCount) {
-    // Use user-specified node count
-    totalNodes = nodeCount;
-  } else {
-    // Calculate sustained load requirements
-    const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
+  const peakRPS = requestsPerSecond * peakMultiplier;
+  const rpsCapacityPerNode = instanceConfig.vCpus * rpsPerVcpu[workloadProfile];
+  const nodesForRPS = Math.ceil(peakRPS / rpsCapacityPerNode);
 
-    const peakRPS = requestsPerSecond * peakMultiplier;
-    const rpsCapacityPerNode = instanceConfig.vCpus * rpsPerVcpu[workloadProfile];
-    const nodesForRPS = Math.ceil(peakRPS / rpsCapacityPerNode);
+  const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
+  const nodesForMemory = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
 
-    const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
-    const nodesForMemory = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
-
-    totalNodes = Math.max(2, nodesForRPS, nodesForMemory);
-  }
+  const totalNodes = Math.max(minimumNodes, nodesForRPS, nodesForMemory);
 
   // Compute cost
   const computeCost = totalNodes * nodePrice;
@@ -111,7 +102,6 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
 
   // Calculate LCU (Load Balancer Capacity Units) based on requests
   // 1 LCU = 1 connection per second, 1 GB per hour, 1000 new connections per minute
-  const requestsPerSecond = (requestsPerMonth / (30 * 24 * 60 * 60));
   const lcuForRequests = Math.ceil(requestsPerSecond / 25); // Assuming 25 requests per second per LCU
   const lcuCost = lcuForRequests * albRequestPrice * 24 * 30;
 

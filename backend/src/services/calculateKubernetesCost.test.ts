@@ -54,18 +54,9 @@ describe('calculateKubernetesCost', () => {
         expect(result.computeCost).toBeGreaterThanOrEqual(29);
     });
 
-    it('should respect overrideAutoScaling parameter', () => {
-        // Test with auto-scaling override
-        const overrideParams: EstimationParams = {
-            ...testParams,
-            overrideAutoScaling: true,
-            nodeCount: 5
-        };
-
-        const result = calculateKubernetesCost(overrideParams);
-
-        // Verify node count matches the override
-        expect(result.nodeCount).toBe(5);
+    it('should respect minimumNodes parameter', () => {
+        const result = calculateKubernetesCost({ ...testParams, minimumNodes: 5 });
+        expect(result.nodeCount).toBeGreaterThanOrEqual(5);
     });
 
     it('should use specified EC2 instance type', () => {

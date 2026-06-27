@@ -9,8 +9,7 @@ export interface EstimationParams {
   workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
-  nodeCount?: number;
-  overrideAutoScaling?: boolean;
+  minimumNodes?: number;
 }
 
 export interface ChartEstimationParams {
@@ -21,8 +20,7 @@ export interface ChartEstimationParams {
   workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
-  nodeCount?: number;
-  overrideAutoScaling?: boolean;
+  minimumNodes?: number;
 }
 
 export interface CostBreakdown {

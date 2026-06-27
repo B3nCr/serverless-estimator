@@ -15,8 +15,6 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     workloadProfile: 'standard',
     apiGatewayType: 'REST',
     ec2InstanceType: '',
-    nodeCount: 2,
-    overrideAutoScaling: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -147,34 +145,19 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
         </select>
       </div>
 
-      <div className="form-group checkbox-group">
+      <div className="form-group">
+        <label htmlFor="minimumNodes">Minimum Nodes (optional)</label>
         <input
-          type="checkbox"
-          id="overrideAutoScaling"
-          name="overrideAutoScaling"
-          checked={params.overrideAutoScaling}
-          onChange={(e) => setParams({
-            ...params,
-            overrideAutoScaling: e.target.checked
-          })}
+          type="number"
+          id="minimumNodes"
+          name="minimumNodes"
+          value={params.minimumNodes ?? ''}
+          onChange={handleChange}
+          min="2"
+          placeholder="2 (default)"
         />
-        <label htmlFor="overrideAutoScaling">Override auto-scaling (specify fixed node count)</label>
+        <small className="form-hint">Set higher for multi-AZ redundancy requirements, e.g. 3</small>
       </div>
-      
-      {params.overrideAutoScaling && (
-        <div className="form-group">
-          <label htmlFor="nodeCount">Number of Nodes</label>
-          <input
-            type="number"
-            id="nodeCount"
-            name="nodeCount"
-            value={params.nodeCount}
-            onChange={handleChange}
-            min="2"
-            required={params.overrideAutoScaling}
-          />
-        </div>
-      )}
 
       <button type="submit" disabled={isLoading}>
         {isLoading ? 'Calculating...' : 'Calculate Costs'}

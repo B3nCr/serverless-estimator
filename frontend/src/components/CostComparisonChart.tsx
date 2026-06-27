@@ -86,7 +86,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
         <div className="kubernetes-info">
           <p>
             <strong>Kubernetes Configuration:</strong> {kubernetesInfo.nodeCount} nodes of type {kubernetesInfo.instanceType}
-            {params.overrideAutoScaling ? ' (manually configured)' : ' (auto-scaled)'}
+            {params.minimumNodes ? ` (minimum ${params.minimumNodes} nodes)` : ' (auto-scaled)'}
           </p>
         </div>
       )}
