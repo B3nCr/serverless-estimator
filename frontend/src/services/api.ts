@@ -66,7 +66,10 @@ export interface ChartComparisonResult {
   };
 }
 
-const API_URL = '/api';
+// Base URL for the API. Defaults to '/api' (proxied to the local backend by
+// Vite in dev — see vite.config.ts). Set VITE_API_URL to point at a deployed
+// API Gateway, e.g. https://<id>.execute-api.<region>.amazonaws.com/prod/api
+const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 /**
  * Estimate costs for serverless and Kubernetes architectures
