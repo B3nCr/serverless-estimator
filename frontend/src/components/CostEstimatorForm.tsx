@@ -47,6 +47,11 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="heavy">Heavy — multiple queries or external calls</option>
           <option value="compute">Compute — ML inference, image processing</option>
         </select>
+        {params.workloadProfile === 'heavy' && (
+          <small className="form-hint">
+            For async-heavy workloads, AWS Step Functions (Express) can reduce costs by billing Lambda only for actual compute time rather than total wait time — but this tool models Lambda + API Gateway only.
+          </small>
+        )}
       </div>
 
       <div className="form-group">
