@@ -9,7 +9,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     requestsPerMonth,
     averageRequestDurationMs,
     averageMemoryMb,
-    burstConcurrentRequests,
+    peakMultiplier = 3,
     region = 'us-east-1',
     ec2InstanceType,
     nodeCount,
@@ -51,16 +51,10 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     // Calculate sustained load requirements
     const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
 
-    // Calculate memory needed for sustained load
     const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
-    const nodesForSustained = Math.ceil(sustainedMemoryMb / memoryPerNode);
+    const nodesForPeak = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
 
-    // Calculate memory needed for burst capacity
-    const burstMemoryMb = (burstConcurrentRequests || 0) * averageMemoryMb;
-    const nodesForBurst = Math.ceil(burstMemoryMb / memoryPerNode);
-
-    // Use the higher of sustained or burst requirements, minimum 2 for HA
-    totalNodes = Math.max(2, nodesForSustained, nodesForBurst);
+    totalNodes = Math.max(2, nodesForPeak);
   }
 
   // Compute cost

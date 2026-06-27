@@ -64,9 +64,7 @@ describe('API Integration Tests', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        minRequestsPerMonth: 10000,
-        maxRequestsPerMonth: 1000000,
-        dataPoints: 10
+        peakMultiplier: 3
       };
 
       // Act
@@ -83,7 +81,7 @@ describe('API Integration Tests', () => {
       
       // Check data points
       expect(Array.isArray(response.body.dataPoints)).toBe(true);
-      expect(response.body.dataPoints.length).toBe(10); // As specified in request
+      expect(response.body.dataPoints.length).toBe(20);
       
       // Check each data point has the right structure
       response.body.dataPoints.forEach((point: any) => {

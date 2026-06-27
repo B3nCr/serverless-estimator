@@ -5,7 +5,7 @@ export interface EstimationParams {
   averageRequestDurationMs: number;
   averageMemoryMb: number;
   region?: string;
-  burstConcurrentRequests?: number;
+  peakMultiplier?: number;
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   nodeCount?: number;
@@ -16,11 +16,8 @@ export interface ChartEstimationParams {
   averageRequestDurationMs: number;
   averageMemoryMb: number;
   region?: string;
-  burstConcurrentRequests?: number;
+  peakMultiplier?: number;
   apiGatewayType?: 'REST' | 'HTTP';
-  minRequestsPerMonth?: number;
-  maxRequestsPerMonth?: number;
-  dataPoints?: number;
   ec2InstanceType?: string;
   nodeCount?: number;
   overrideAutoScaling?: boolean;

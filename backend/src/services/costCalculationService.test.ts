@@ -8,7 +8,7 @@ describe('Cost Calculation Service', () => {
     averageRequestDurationMs: 100,
     averageMemoryMb: 128,
     region: 'us-east-1',
-    burstConcurrentRequests: 100
+    peakMultiplier: 3
   };
 
   describe('calculateServerlessCost', () => {
@@ -99,7 +99,7 @@ describe('Cost Calculation Service', () => {
         requestsPerMonth: 100000000, // 100M requests
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
-        burstConcurrentRequests: 2000
+        peakMultiplier: 3
       };
 
       const serverlessCost = calculateServerlessCost(highVolumeParams);

@@ -9,7 +9,7 @@ export interface EstimationParams {
   
   // Optional parameters with defaults
   region?: string;
-  burstConcurrentRequests?: number;
+  peakMultiplier?: number; // Peak traffic multiple of average (default 3)
   apiGatewayType?: 'REST' | 'HTTP'; // API Gateway type (REST or HTTP)
   
   // Kubernetes specific overrides
@@ -22,20 +22,10 @@ export interface EstimationParams {
  * Parameters for cost comparison chart
  */
 export interface ChartEstimationParams {
-  // Fixed parameters
   averageRequestDurationMs: number;
   averageMemoryMb: number;
-  
-  // Optional parameters with defaults
   region?: string;
-  burstConcurrentRequests?: number;
-  
-  // Request range for chart
-  minRequestsPerMonth?: number;
-  maxRequestsPerMonth?: number;
-  dataPoints?: number;
-  
-  // Kubernetes specific overrides
+  peakMultiplier?: number;
   ec2InstanceType?: string;
   nodeCount?: number;
   overrideAutoScaling?: boolean;

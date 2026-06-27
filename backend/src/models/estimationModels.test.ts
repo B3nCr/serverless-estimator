@@ -15,20 +15,20 @@ describe('Estimation Models', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        burstConcurrentRequests: 100,
+        peakMultiplier: 3,
         ec2InstanceType: 't3.medium',
         nodeCount: 2,
         overrideAutoScaling: false
       };
-      
+
       // Verify required properties
       expect(params.requestsPerMonth).toBe(1000000);
       expect(params.averageRequestDurationMs).toBe(100);
       expect(params.averageMemoryMb).toBe(128);
-      
+
       // Verify optional properties
       expect(params.region).toBe('us-east-1');
-      expect(params.burstConcurrentRequests).toBe(100);
+      expect(params.peakMultiplier).toBe(3);
       expect(params.ec2InstanceType).toBe('t3.medium');
       expect(params.nodeCount).toBe(2);
       expect(params.overrideAutoScaling).toBe(false);
@@ -48,7 +48,7 @@ describe('Estimation Models', () => {
       
       // Optional properties should be undefined
       expect(params.region).toBeUndefined();
-      expect(params.burstConcurrentRequests).toBeUndefined();
+      expect(params.peakMultiplier).toBeUndefined();
       expect(params.ec2InstanceType).toBeUndefined();
       expect(params.nodeCount).toBeUndefined();
       expect(params.overrideAutoScaling).toBeUndefined();
@@ -61,24 +61,19 @@ describe('Estimation Models', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        burstConcurrentRequests: 100,
-        minRequestsPerMonth: 10000,
-        maxRequestsPerMonth: 1000000,
-        dataPoints: 20,
+        peakMultiplier: 3,
         ec2InstanceType: 't3.medium',
         nodeCount: 2,
         overrideAutoScaling: false
       };
-      
+
       // Verify required properties
       expect(params.averageRequestDurationMs).toBe(100);
       expect(params.averageMemoryMb).toBe(128);
-      
+
       // Verify optional properties
       expect(params.region).toBe('us-east-1');
-      expect(params.minRequestsPerMonth).toBe(10000);
-      expect(params.maxRequestsPerMonth).toBe(1000000);
-      expect(params.dataPoints).toBe(20);
+      expect(params.peakMultiplier).toBe(3);
     });
   });
   

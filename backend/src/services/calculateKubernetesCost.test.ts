@@ -7,7 +7,7 @@ describe('calculateKubernetesCost', () => {
         averageRequestDurationMs: 100,
         averageMemoryMb: 128,
         region: 'us-east-1',
-        burstConcurrentRequests: 100
+        peakMultiplier: 3
     };
 
     it('should calculate kubernetes costs correctly', () => {
@@ -41,7 +41,7 @@ describe('calculateKubernetesCost', () => {
             requestsPerMonth: 10000,
             averageRequestDurationMs: 50,
             averageMemoryMb: 64,
-            burstConcurrentRequests: 5
+            peakMultiplier: 3
         };
 
         const result = calculateKubernetesCost(lowParams);
@@ -100,7 +100,7 @@ describe('calculateKubernetesCost', () => {
             averageRequestDurationMs: 1000,
             averageMemoryMb: 512,
             ec2InstanceType: 't3.small', // 2GB memory
-            burstConcurrentRequests: 1
+            peakMultiplier: 1
         };
 
         const result = calculateKubernetesCost(params);
@@ -113,7 +113,7 @@ describe('calculateKubernetesCost', () => {
             averageRequestDurationMs: 1000,
             averageMemoryMb: 512,
             ec2InstanceType: 't3.small', // 2GB memory
-            burstConcurrentRequests: 1
+            peakMultiplier: 1
         };
         const result2m = calculateKubernetesCost(params2);
 
@@ -134,30 +134,30 @@ describe('calculateKubernetesCost', () => {
     });
 
     describe('pinned cost values', () => {
-        it('1M requests, 100ms, 128MB, t3.medium, 100 burst produces known dollar amounts', () => {
+        it('1M requests, 100ms, 128MB, t3.medium, 3× peak produces known dollar amounts', () => {
             const params: EstimationParams = {
                 requestsPerMonth: 1_000_000,
                 averageRequestDurationMs: 100,
                 averageMemoryMb: 128,
                 region: 'us-east-1',
-                burstConcurrentRequests: 100,
+                peakMultiplier: 3,
                 ec2InstanceType: 't3.medium',
             };
             const result = calculateKubernetesCost(params);
 
-            // burst drives node count: 100 concurrent × 128MB / 4096MB per node = 4 nodes
-            expect(result.nodeCount).toBe(4);
-            // 4 × $0.0416/hr × 720hr/month
-            expect(result.computeCost).toBeCloseTo(119.81, 1);
-            // ALB base $16.20 + LCU cost ~$0.004
+            // sustained: 0.386 req/s × 128MB × 0.1s = 4.94MB × 3 = 14.8MB → 1 node → HA floor = 2
+            expect(result.nodeCount).toBe(2);
+            // 2 × $0.0416/hr × 720hr/month
+            expect(result.computeCost).toBeCloseTo(59.90, 1);
+            // ALB base $16.20 + 1 LCU × $0.000005 × 720hr
             expect(result.requestCost).toBeCloseTo(16.20, 1);
             // 1M × 10KB / 1048576 GB × $0.09/GB
             expect(result.networkCost).toBeCloseTo(0.8583, 3);
-            // 4 nodes × 20GB × $0.10/GB-month
-            expect(result.storageCost).toBeCloseTo(8.00, 4);
+            // 2 nodes × 20GB × $0.10/GB-month
+            expect(result.storageCost).toBeCloseTo(4.00, 4);
             // EKS: $0.10/hr × 720hr
             expect(result.managementCost).toBeCloseTo(72.00, 4);
-            expect(result.totalCost).toBeCloseTo(216.87, 1);
+            expect(result.totalCost).toBeCloseTo(152.97, 1);
         });
     });
 });

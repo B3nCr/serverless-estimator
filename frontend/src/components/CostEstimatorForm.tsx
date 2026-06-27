@@ -11,11 +11,8 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     averageRequestDurationMs: 100,
     averageMemoryMb: 128,
     region: 'us-east-1',
-    burstConcurrentRequests: 200,
+    peakMultiplier: 3,
     apiGatewayType: 'REST',
-    minRequestsPerMonth: 10000, // 10K
-    maxRequestsPerMonth: 100000000, // 100M
-    dataPoints: 20,
     ec2InstanceType: 't3.medium',
     nodeCount: 2,
     overrideAutoScaling: false
@@ -36,32 +33,6 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="cost-form">
-      <div className="form-group">
-        <label htmlFor="minRequestsPerMonth">Min Requests per Month</label>
-        <input
-          type="number"
-          id="minRequestsPerMonth"
-          name="minRequestsPerMonth"
-          value={params.minRequestsPerMonth}
-          onChange={handleChange}
-          min="1000"
-          required
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="maxRequestsPerMonth">Max Requests per Month</label>
-        <input
-          type="number"
-          id="maxRequestsPerMonth"
-          name="maxRequestsPerMonth"
-          value={params.maxRequestsPerMonth}
-          onChange={handleChange}
-          min="10000"
-          required
-        />
-      </div>
-
       <div className="form-group">
         <label htmlFor="averageRequestDurationMs">Average Request Duration (ms)</label>
         <input
@@ -119,14 +90,15 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="burstConcurrentRequests">Peak Concurrent Requests</label>
+        <label htmlFor="peakMultiplier">Peak Traffic Multiplier</label>
         <input
           type="number"
-          id="burstConcurrentRequests"
-          name="burstConcurrentRequests"
-          value={params.burstConcurrentRequests}
+          id="peakMultiplier"
+          name="peakMultiplier"
+          value={params.peakMultiplier}
           onChange={handleChange}
           min="1"
+          max="10"
         />
       </div>
       
