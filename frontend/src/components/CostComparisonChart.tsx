@@ -95,7 +95,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
         <ResponsiveContainer>
           <LineChart
             data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 5, right: 30, left: 60, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
@@ -107,26 +107,13 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
             />
             <YAxis
               tickFormatter={(value) => `$${value}`}
-              label={{ value: 'Monthly Cost (USD)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Monthly Cost (USD)', angle: -90, position: 'insideLeft', offset: -10 }}
             />
             <Tooltip
-              formatter={(value: number, name: string, _: any) => {
-                if (name === "Kubernetes Node Count") {
-                  return `${value} nodes`
-                }
-                return name + formatCurrency(value);
-              }}
+              formatter={(value: number, name: string) => [formatCurrency(value), name]}
               labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
             />
-
             <Legend />
-            <Line type="monotone"
-              dataKey="kubernetesNodeCount"
-              name="Kubernetes Node Count"
-              stroke="#ff5500"
-              activeDot={{ r: 8 }}
-              strokeWidth={2}
-            />
             <Line
               type="monotone"
               dataKey="serverlessCost"
@@ -141,6 +128,35 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
               name="Kubernetes"
               stroke="#326ce5"
               activeDot={{ r: 8 }}
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="chart-wrapper" style={{ width: '100%', height: 120, marginTop: -20 }}>
+        <ResponsiveContainer>
+          <LineChart
+            data={chartData}
+            margin={{ top: 0, right: 30, left: 60, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="requestsPerMonth" hide={true} />
+            <YAxis
+              allowDecimals={false}
+              domain={[0, (dataMax: number) => Math.max(dataMax + 1, 4)]}
+              label={{ value: 'Nodes', angle: -90, position: 'insideLeft', offset: 15 }}
+            />
+            <Tooltip
+              formatter={(value: number) => [`${value} nodes`, 'K8s Node Count']}
+              labelFormatter={(value: number) => `${formatNumber(value)} requests/month`}
+            />
+            <Line
+              type="stepAfter"
+              dataKey="kubernetesNodeCount"
+              name="K8s Node Count"
+              stroke="#326ce5"
+              dot={false}
               strokeWidth={2}
             />
           </LineChart>
