@@ -52,79 +52,70 @@ router.post('/chart', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
     
-    // Set defaults if not provided
-    const minRequests = params.minRequestsPerMonth || 10000; // 10K
-    const maxRequests = params.maxRequestsPerMonth || 100000000; // 100M
-    const dataPoints = params.dataPoints || 20;
-    
-    // Generate logarithmic scale of request counts
-    const requestCounts: number[] = [];
-    const logMin = Math.log10(minRequests);
-    const logMax = Math.log10(maxRequests);
-    const step = (logMax - logMin) / (dataPoints - 1);
-    
-    for (let i = 0; i < dataPoints; i++) {
-      const logValue = logMin + (step * i);
-      requestCounts.push(Math.round(Math.pow(10, logValue)));
+    // Coarse sweep across 1K–1B to find approximate inflection point
+    const coarsePoints = 30;
+    const coarseMin = 1000;
+    const coarseMax = 1000000000;
+    const coarseLogStep = (Math.log10(coarseMax) - Math.log10(coarseMin)) / (coarsePoints - 1);
+
+    let approxInflection: number | null = null;
+    let prevDiff: number | null = null;
+
+    for (let i = 0; i < coarsePoints; i++) {
+      const requests = Math.round(Math.pow(10, Math.log10(coarseMin) + coarseLogStep * i));
+      const sl = calculateServerlessCost({ ...params, requestsPerMonth: requests });
+      const k8s = calculateKubernetesCost({ ...params, requestsPerMonth: requests });
+      const diff = sl.totalCost - k8s.totalCost;
+      if (prevDiff !== null && ((prevDiff <= 0 && diff > 0) || (prevDiff >= 0 && diff < 0))) {
+        approxInflection = requests;
+        break;
+      }
+      prevDiff = diff;
     }
-    
-    // Calculate costs for each request count
+
+    // Build the chart range centred around the inflection point.
+    // If no crossover exists, fall back to a sensible default window.
+    const chartMin = approxInflection ? Math.max(1000, approxInflection / 50) : coarseMin;
+    const chartMax = approxInflection ? approxInflection * 5 : coarseMax;
+    const dataPoints = 20;
+
+    const requestCounts: number[] = [];
+    const logMin = Math.log10(chartMin);
+    const logMax = Math.log10(chartMax);
+    const step = (logMax - logMin) / (dataPoints - 1);
+    for (let i = 0; i < dataPoints; i++) {
+      requestCounts.push(Math.round(Math.pow(10, logMin + step * i)));
+    }
+
+    // Calculate costs for the focused range
     const chartData: CostChartDataPoint[] = [];
     let inflectionPoint: number | null = null;
     let previousDifference: number | null = null;
-    
+
     for (const requestsPerMonth of requestCounts) {
-      const estimationParams: EstimationParams = {
-        ...params,
-        requestsPerMonth
-      };
-      
+      const estimationParams: EstimationParams = { ...params, requestsPerMonth };
       const serverlessCost = calculateServerlessCost(estimationParams);
       const kubernetesCost = calculateKubernetesCost(estimationParams);
-      
+
       chartData.push({
         requestsPerMonth,
         serverlessCost: serverlessCost.totalCost,
         kubernetesCost: kubernetesCost.totalCost,
-        kubernetesNodeCount: kubernetesCost.nodeCount 
+        kubernetesNodeCount: kubernetesCost.nodeCount
       });
-      
-      // Check for inflection point (where serverless becomes more expensive)
+
       const currentDifference = serverlessCost.totalCost - kubernetesCost.totalCost;
-      
-      if (previousDifference !== null && 
-          ((previousDifference <= 0 && currentDifference > 0) || 
+      if (previousDifference !== null &&
+          ((previousDifference <= 0 && currentDifference > 0) ||
            (previousDifference >= 0 && currentDifference < 0))) {
-        // We've crossed the inflection point
         inflectionPoint = requestsPerMonth;
       }
-      
       previousDifference = currentDifference;
     }
-    
-    // If we didn't find an inflection point but the last point shows a crossover
-    if (inflectionPoint === null && chartData.length >= 2) {
-      const lastPoint = chartData[chartData.length - 1];
-      const secondLastPoint = chartData[chartData.length - 2];
-      
-      if ((lastPoint.serverlessCost > lastPoint.kubernetesCost && 
-           secondLastPoint.serverlessCost <= secondLastPoint.kubernetesCost) ||
-          (lastPoint.serverlessCost < lastPoint.kubernetesCost && 
-           secondLastPoint.serverlessCost >= secondLastPoint.kubernetesCost)) {
-        // Estimate inflection point by linear interpolation
-        inflectionPoint = lastPoint.requestsPerMonth;
-      }
-    }
-    
-    // Get Kubernetes info from the middle point for reference
-    const midPointIndex = Math.floor(chartData.length / 2);
-    const midPointRequests = requestCounts[midPointIndex];
-    const midPointParams: EstimationParams = {
-      ...params,
-      requestsPerMonth: midPointRequests
-    };
-    
-    const kubernetesCost = calculateKubernetesCost(midPointParams);
+
+    // Get Kubernetes info from the point nearest the inflection (or midpoint)
+    const refRequests = inflectionPoint ?? requestCounts[Math.floor(requestCounts.length / 2)];
+    const kubernetesCost = calculateKubernetesCost({ ...params, requestsPerMonth: refRequests });
     
     const result: ChartComparisonResult = {
       dataPoints: chartData,
