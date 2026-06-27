@@ -110,4 +110,42 @@ describe('Cost Calculation Service', () => {
       console.log(`High volume comparison: Serverless $${serverlessCost.totalCost.toFixed(2)} vs Kubernetes $${kubernetesCost.totalCost.toFixed(2)}`);
     });
   });
+
+  describe('pinned cost values', () => {
+    it('serverless REST: 1M requests, 100ms, 128MB produces known dollar amounts', () => {
+      const params: EstimationParams = {
+        requestsPerMonth: 1_000_000,
+        averageRequestDurationMs: 100,
+        averageMemoryMb: 128,
+        region: 'us-east-1',
+        apiGatewayType: 'REST',
+      };
+      const result = calculateServerlessCost(params);
+
+      // 1M × 0.1s × (128/1024)GB × $0.0000166667/GB-s
+      expect(result.computeCost).toBeCloseTo(0.2083, 3);
+      // (1M × $0.0000002 lambda) + (1M × $0.0000035 REST API GW)
+      expect(result.requestCost).toBeCloseTo(3.70, 4);
+      // 1M × 10KB / 1048576 GB × $0.09/GB
+      expect(result.networkCost).toBeCloseTo(0.8583, 3);
+      expect(result.totalCost).toBeCloseTo(4.7666, 3);
+    });
+
+    it('serverless HTTP: 1M requests, 100ms, 128MB produces known dollar amounts', () => {
+      const params: EstimationParams = {
+        requestsPerMonth: 1_000_000,
+        averageRequestDurationMs: 100,
+        averageMemoryMb: 128,
+        region: 'us-east-1',
+        apiGatewayType: 'HTTP',
+      };
+      const result = calculateServerlessCost(params);
+
+      // (1M × $0.0000002 lambda) + (1M × $0.0000010 HTTP API GW)
+      expect(result.requestCost).toBeCloseTo(1.20, 4);
+      // HTTP: first 1GB free → (9.537 - 1)GB × $0.09
+      expect(result.networkCost).toBeCloseTo(0.7683, 3);
+      expect(result.totalCost).toBeCloseTo(2.1766, 3);
+    });
+  });
 });
