@@ -6,6 +6,7 @@ export interface EstimationParams {
   averageMemoryMb: number;
   region?: string;
   peakMultiplier?: number;
+  workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   nodeCount?: number;
@@ -17,6 +18,7 @@ export interface ChartEstimationParams {
   averageMemoryMb: number;
   region?: string;
   peakMultiplier?: number;
+  workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   nodeCount?: number;

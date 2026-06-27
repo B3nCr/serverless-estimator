@@ -12,6 +12,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     averageMemoryMb: 128,
     region: 'us-east-1',
     peakMultiplier: 3,
+    workloadProfile: 'standard',
     apiGatewayType: 'REST',
     ec2InstanceType: 't3.medium',
     nodeCount: 2,
@@ -22,7 +23,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     const { name, value } = e.target;
     setParams({
       ...params,
-      [name]: ['region', 'ec2InstanceType', 'apiGatewayType'].includes(name) ? value : Number(value)
+      [name]: ['region', 'ec2InstanceType', 'apiGatewayType', 'workloadProfile'].includes(name) ? value : Number(value)
     });
   };
 
@@ -33,6 +34,21 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="cost-form">
+      <div className="form-group">
+        <label htmlFor="workloadProfile">Workload Profile</label>
+        <select
+          id="workloadProfile"
+          name="workloadProfile"
+          value={params.workloadProfile}
+          onChange={handleChange}
+        >
+          <option value="lightweight">Lightweight — cached or static responses</option>
+          <option value="standard">Standard — typical DB-backed API</option>
+          <option value="heavy">Heavy — multiple queries or external calls</option>
+          <option value="compute">Compute — ML inference, image processing</option>
+        </select>
+      </div>
+
       <div className="form-group">
         <label htmlFor="averageRequestDurationMs">Average Request Duration (ms)</label>
         <input

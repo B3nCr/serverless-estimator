@@ -10,6 +10,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     averageRequestDurationMs,
     averageMemoryMb,
     peakMultiplier = 3,
+    workloadProfile = 'standard',
     region = 'us-east-1',
     ec2InstanceType,
     nodeCount,
@@ -17,21 +18,28 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
   } = params;
 
   // EKS pricing
-  const eksClusterPrice = 0.10 * 24 * 30; // $0.10 per hour * 24 hours * 30 days
+  const eksClusterPrice = 0.10 * 24 * 30;
 
+  // RPS capacity per vCPU by workload profile
+  const rpsPerVcpu: Record<string, number> = {
+    lightweight: 200, // cached/static responses
+    standard:     50, // typical DB-backed API
+    heavy:        15, // multiple queries, external calls
+    compute:       3, // ML inference, image processing
+  };
 
   // EC2 instance type configuration
   const instanceTypes: { [key: string]: any; } = {
-    't3.small': { price: 0.0208, memory: 2 * 1024 }, // 2GB, $0.0208/hr
-    't3.medium': { price: 0.0416, memory: 4 * 1024 }, // 4GB, $0.0416/hr
-    't3.large': { price: 0.0832, memory: 8 * 1024 }, // 8GB, $0.0832/hr
-    't3.xlarge': { price: 0.1664, memory: 16 * 1024 }, // 16GB, $0.1664/hr
-    'm5.large': { price: 0.096, memory: 8 * 1024 }, // 8GB, $0.096/hr
-    'm5.xlarge': { price: 0.192, memory: 16 * 1024 }, // 16GB, $0.192/hr
-    'm5.2xlarge': { price: 0.384, memory: 32 * 1024 }, // 32GB, $0.384/hr
-    'c5.large': { price: 0.085, memory: 4 * 1024 }, // 4GB, $0.085/hr
-    'c5.xlarge': { price: 0.17, memory: 8 * 1024 }, // 8GB, $0.17/hr
-    'c5.2xlarge': { price: 0.34, memory: 16 * 1024 } // 16GB, $0.34/hr
+    't3.small':   { price: 0.0208, memory: 2 * 1024,  vCpus: 2 },
+    't3.medium':  { price: 0.0416, memory: 4 * 1024,  vCpus: 2 },
+    't3.large':   { price: 0.0832, memory: 8 * 1024,  vCpus: 2 },
+    't3.xlarge':  { price: 0.1664, memory: 16 * 1024, vCpus: 4 },
+    'm5.large':   { price: 0.096,  memory: 8 * 1024,  vCpus: 2 },
+    'm5.xlarge':  { price: 0.192,  memory: 16 * 1024, vCpus: 4 },
+    'm5.2xlarge': { price: 0.384,  memory: 32 * 1024, vCpus: 8 },
+    'c5.large':   { price: 0.085,  memory: 4 * 1024,  vCpus: 2 },
+    'c5.xlarge':  { price: 0.17,   memory: 8 * 1024,  vCpus: 4 },
+    'c5.2xlarge': { price: 0.34,   memory: 16 * 1024, vCpus: 8 },
   };
 
   // Default to t3.medium if not specified or invalid
@@ -51,10 +59,14 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     // Calculate sustained load requirements
     const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
 
-    const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
-    const nodesForPeak = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
+    const peakRPS = requestsPerSecond * peakMultiplier;
+    const rpsCapacityPerNode = instanceConfig.vCpus * rpsPerVcpu[workloadProfile];
+    const nodesForRPS = Math.ceil(peakRPS / rpsCapacityPerNode);
 
-    totalNodes = Math.max(2, nodesForPeak);
+    const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
+    const nodesForMemory = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
+
+    totalNodes = Math.max(2, nodesForRPS, nodesForMemory);
   }
 
   // Compute cost

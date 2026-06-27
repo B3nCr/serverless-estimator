@@ -9,8 +9,9 @@ export interface EstimationParams {
   
   // Optional parameters with defaults
   region?: string;
-  peakMultiplier?: number; // Peak traffic multiple of average (default 3)
-  apiGatewayType?: 'REST' | 'HTTP'; // API Gateway type (REST or HTTP)
+  peakMultiplier?: number;
+  workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
+  apiGatewayType?: 'REST' | 'HTTP';
   
   // Kubernetes specific overrides
   ec2InstanceType?: string;
@@ -26,6 +27,7 @@ export interface ChartEstimationParams {
   averageMemoryMb: number;
   region?: string;
   peakMultiplier?: number;
+  workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   ec2InstanceType?: string;
   nodeCount?: number;
   overrideAutoScaling?: boolean;
