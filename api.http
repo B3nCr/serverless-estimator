@@ -1,0 +1,39 @@
+# REST Client requests for the Cost Estimator API
+# Use with the VS Code "REST Client" extension (humao.rest-client):
+#   - Click "Send Request" above any request below.
+# Switch @baseUrl between the deployed API Gateway and your local dev server.
+
+# --- Deployed API Gateway (eu-west-2, stage: prod) ---
+@baseUrl = https://2lg6zp5x78.execute-api.eu-west-2.amazonaws.com/prod
+
+# --- Local Express dev server (npm run dev) ---
+# @baseUrl = http://localhost:3001
+
+### Health check
+GET {{baseUrl}}/health
+
+### Estimate costs
+POST {{baseUrl}}/api/estimate
+Content-Type: application/json
+
+{
+  "requestsPerMonth": 1000000,
+  "averageRequestDurationMs": 200,
+  "averageMemoryMb": 256,
+  "region": "eu-west-2",
+  "apiGatewayType": "REST"
+}
+
+### Estimate chart data
+POST {{baseUrl}}/api/estimate/chart
+Content-Type: application/json
+
+{
+  "averageRequestDurationMs": 200,
+  "averageMemoryMb": 256,
+  "region": "eu-west-2",
+  "apiGatewayType": "REST",
+  "minRequestsPerMonth": 10000,
+  "maxRequestsPerMonth": 100000000,
+  "dataPoints": 20
+}
