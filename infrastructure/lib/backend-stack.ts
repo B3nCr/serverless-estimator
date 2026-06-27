@@ -10,7 +10,7 @@ export class BackendStack extends cdk.Stack {
 
     // Lambda function for cost estimation
     const costEstimatorLambda = new lambda.Function(this, 'CostEstimatorFunction', {
-      runtime: lambda.Runtime.NODEJS_18_X,
+      runtime: lambda.Runtime.NODEJS_24_X,
       handler: 'lambda.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../../backend/dist')),
       timeout: cdk.Duration.seconds(30),
