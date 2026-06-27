@@ -63,7 +63,7 @@ const CostCalculationDocs = () => {
             <h4>📊 Key Assumptions</h4>
             <ul>
               <li>Lambda free tier: 1M requests + 400,000 GB-seconds per month</li>
-              <li>Average response size: 1KB for network calculations</li>
+              <li>Average response size: 10KB for network calculations</li>
               <li>Kubernetes pods: 50% CPU/memory utilization target</li>
               <li>Auto-scaling: Minimum 2 nodes, scales up based on concurrent requests</li>
               <li>All prices in USD, based on us-east-1 region (adjusts for other regions)</li>
