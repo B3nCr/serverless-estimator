@@ -14,7 +14,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     peakMultiplier: 3,
     workloadProfile: 'standard',
     apiGatewayType: 'REST',
-    ec2InstanceType: 't3.medium',
+    ec2InstanceType: '',
     nodeCount: 2,
     overrideAutoScaling: false
   });
@@ -124,7 +124,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
       </div>
       
       <h3>Kubernetes Configuration</h3>
-      
+
       <div className="form-group">
         <label htmlFor="ec2InstanceType">EC2 Instance Type</label>
         <select
@@ -133,6 +133,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           value={params.ec2InstanceType}
           onChange={handleChange}
         >
+          <option value="">Auto (recommended)</option>
           <option value="t3.small">t3.small (2GB RAM)</option>
           <option value="t3.medium">t3.medium (4GB RAM)</option>
           <option value="t3.large">t3.large (8GB RAM)</option>
@@ -145,7 +146,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="c5.2xlarge">c5.2xlarge (16GB RAM)</option>
         </select>
       </div>
-      
+
       <div className="form-group checkbox-group">
         <input
           type="checkbox"

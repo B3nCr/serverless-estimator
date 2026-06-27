@@ -50,8 +50,8 @@ describe('calculateKubernetesCost', () => {
         expect(result.nodeCount).toBeGreaterThanOrEqual(2);
 
         // Verify compute cost reflects at least 2 nodes
-        // t3.medium cost: $0.0416 * 24 * 30 * 2 = ~$59.90
-        expect(result.computeCost).toBeGreaterThanOrEqual(59);
+        // t3.small cost: $0.0208 * 24 * 30 * 2 = ~$29.95
+        expect(result.computeCost).toBeGreaterThanOrEqual(29);
     });
 
     it('should respect overrideAutoScaling parameter', () => {
@@ -81,8 +81,7 @@ describe('calculateKubernetesCost', () => {
         expect(result.instanceType).toBe('c5.xlarge');
     });
 
-    it('should fall back to default instance type if invalid type provided', () => {
-        // Test with invalid instance type
+    it('should auto-select instance type if invalid type provided', () => {
         const invalidParams: EstimationParams = {
             ...testParams,
             ec2InstanceType: 'invalid-type' as any
@@ -90,7 +89,7 @@ describe('calculateKubernetesCost', () => {
 
         const result = calculateKubernetesCost(invalidParams);
 
-        // Verify default instance type is used
+        // Should fall back to auto-selection (128MB standard → t3.medium)
         expect(result.instanceType).toBe('t3.medium');
     });
 
@@ -133,15 +132,37 @@ describe('calculateKubernetesCost', () => {
         expect(result2M.networkCost).toBeCloseTo(result1M.networkCost * 2, 5);
     });
 
+    describe('auto instance type selection', () => {
+        it('standard profile with small memory selects t3.medium', () => {
+            const result = calculateKubernetesCost({ ...testParams, workloadProfile: 'standard', averageMemoryMb: 128 });
+            expect(result.instanceType).toBe('t3.medium'); // 30×128=3840MB → t3.medium (4096MB)
+        });
+
+        it('standard profile with large memory selects t3.xlarge', () => {
+            const result = calculateKubernetesCost({ ...testParams, workloadProfile: 'standard', averageMemoryMb: 300 });
+            expect(result.instanceType).toBe('t3.xlarge'); // 30×300=9000MB > t3.large (8192MB) → t3.xlarge
+        });
+
+        it('heavy profile selects m5 family', () => {
+            const result = calculateKubernetesCost({ ...testParams, workloadProfile: 'heavy', averageMemoryMb: 128 });
+            expect(result.instanceType).toBe('m5.large'); // 30×128=3840MB → m5.large (8192MB)
+        });
+
+        it('compute profile selects c5 family', () => {
+            const result = calculateKubernetesCost({ ...testParams, workloadProfile: 'compute', averageMemoryMb: 128 });
+            expect(result.instanceType).toBe('c5.large'); // 30×128=3840MB → c5.large (4096MB)
+        });
+    });
+
     describe('pinned cost values', () => {
-        it('1M requests, 100ms, 128MB, t3.medium, 3× peak produces known dollar amounts', () => {
+        it('1M requests, 100ms, 128MB, 3× peak produces known dollar amounts', () => {
             const params: EstimationParams = {
                 requestsPerMonth: 1_000_000,
                 averageRequestDurationMs: 100,
                 averageMemoryMb: 128,
                 region: 'us-east-1',
                 peakMultiplier: 3,
-                ec2InstanceType: 't3.medium',
+                // no ec2InstanceType — auto-selected as t3.medium (128MB standard → 30×128=3840MB → t3.medium)
             };
             const result = calculateKubernetesCost(params);
 

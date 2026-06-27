@@ -1,8 +1,36 @@
 import { EstimationParams, KubernetesCostBreakdown } from '../models/estimationModels';
 
-/**
- * Calculate Kubernetes costs
- */
+// Pick the instance family from workload profile, then the smallest size that
+// can comfortably hold ~30 concurrent requests worth of memory.
+function selectInstanceType(averageMemoryMb: number, workloadProfile: string): string {
+  const family =
+    workloadProfile === 'compute' ? 'c5' :
+    workloadProfile === 'heavy'   ? 'm5' : 't3';
+
+  const neededMb = 30 * averageMemoryMb;
+
+  const options: Record<string, { threshold: number; name: string }[]> = {
+    t3: [
+      { threshold: 2048,     name: 't3.small' },
+      { threshold: 4096,     name: 't3.medium' },
+      { threshold: 8192,     name: 't3.large' },
+      { threshold: Infinity, name: 't3.xlarge' },
+    ],
+    m5: [
+      { threshold: 8192,     name: 'm5.large' },
+      { threshold: 16384,    name: 'm5.xlarge' },
+      { threshold: Infinity, name: 'm5.2xlarge' },
+    ],
+    c5: [
+      { threshold: 4096,     name: 'c5.large' },
+      { threshold: 8192,     name: 'c5.xlarge' },
+      { threshold: Infinity, name: 'c5.2xlarge' },
+    ],
+  };
+
+  const sizes = options[family];
+  return sizes.find(s => neededMb <= s.threshold)!.name;
+}
 
 export function calculateKubernetesCost(params: EstimationParams): KubernetesCostBreakdown {
   const {
@@ -42,9 +70,10 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     'c5.2xlarge': { price: 0.34,   memory: 16 * 1024, vCpus: 8 },
   };
 
-  // Default to t3.medium if not specified or invalid
-  const selectedInstanceType = ec2InstanceType && instanceTypes[ec2InstanceType] ?
-    ec2InstanceType : 't3.medium';
+  // Auto-select instance type from workload characteristics if not explicitly provided
+  const selectedInstanceType = (ec2InstanceType && instanceTypes[ec2InstanceType])
+    ? ec2InstanceType
+    : selectInstanceType(averageMemoryMb, workloadProfile);
 
   const instanceConfig = instanceTypes[selectedInstanceType];
   const nodePrice = instanceConfig.price * 24 * 30; // hourly price * 24 hours * 30 days
