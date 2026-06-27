@@ -10,7 +10,6 @@ const router = Router();
  * @route POST /api/estimate
  */
 router.post('/', async (req: Request, res: Response) => {
-  console.log('Received cost estimation request ("/") with body:', req.body);
   try {
     const params: EstimationParams = req.body;
     
@@ -33,7 +32,7 @@ router.post('/', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error calculating costs:', error);
+    req.log.error({ err: error }, 'Error calculating costs');
     res.status(500).json({ error: 'Failed to calculate costs' });
   }
 });
@@ -43,7 +42,6 @@ router.post('/', async (req: Request, res: Response) => {
  * @route POST /api/estimate/chart
  */
 router.post('/chart', async (req: Request, res: Response) => {
-  console.log('Received chart estimation request with body:', req.body);
   try {
     const params: ChartEstimationParams = req.body;
     
@@ -128,7 +126,7 @@ router.post('/chart', async (req: Request, res: Response) => {
     
     res.json(result);
   } catch (error) {
-    console.error('Error calculating chart data:', error);
+    req.log.error({ err: error }, 'Error calculating chart data');
     res.status(500).json({ error: 'Failed to calculate chart data' });
   }
 });

@@ -7,21 +7,11 @@ import { ChartEstimationParams } from './services/api'
 
 function App() {
   const [chartParams, setChartParams] = useState<ChartEstimationParams | null>(null)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleEstimate = async (params: ChartEstimationParams) => {
-    setLoading(true)
+  const handleEstimate = (params: ChartEstimationParams) => {
     setError(null)
-    
-    try {
-      setChartParams(params)
-    } catch (err) {
-      setError('Failed to prepare chart data. Please try again.')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    setChartParams(params)
   }
 
   return (
@@ -35,7 +25,7 @@ function App() {
       
       <CostCalculationDocs />
       
-      <CostEstimatorForm onSubmit={handleEstimate} isLoading={loading} />
+      <CostEstimatorForm onSubmit={handleEstimate} isLoading={false} />
       
       {error && <div className="error">{error}</div>}
       

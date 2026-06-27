@@ -48,7 +48,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
         }
       } catch (err) {
         setError('Failed to generate chart data');
-        console.error(err);
+        console.error('Failed to fetch chart data from /api/estimate/chart:', err);
       } finally {
         setLoading(false);
       }
