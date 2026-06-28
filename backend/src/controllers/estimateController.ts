@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { calculateServerlessCost } from '../services/calculateServerlessCost';
 import { calculateKubernetesCost } from '../services/calculateKubernetesCost';
 import { EstimationParams, ChartEstimationParams, CostChartDataPoint, ChartComparisonResult } from '../models/estimationModels';
+import logger from '../logger';
 
 const router = Router();
 
@@ -32,7 +33,7 @@ router.post('/', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    req.log.error({ err: error }, 'Error calculating costs');
+    logger.error({ err: error }, 'Error calculating costs');
     res.status(500).json({ error: 'Failed to calculate costs' });
   }
 });
@@ -126,7 +127,7 @@ router.post('/chart', async (req: Request, res: Response) => {
     
     res.json(result);
   } catch (error) {
-    req.log.error({ err: error }, 'Error calculating chart data');
+    logger.error({ err: error }, 'Error calculating chart data');
     res.status(500).json({ error: 'Failed to calculate chart data' });
   }
 });
