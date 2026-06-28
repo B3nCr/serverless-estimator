@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ChartEstimationParams, generateChartData, CostChartDataPoint } from '../services/api';
+import { ChartEstimationParams, generateChartData, CostChartDataPoint, isRateLimitError } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface CostComparisonChartProps {
@@ -47,7 +47,7 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
           setKubernetesInfo(result.kubernetesInfo);
         }
       } catch (err) {
-        setError('Failed to generate chart data');
+        setError(isRateLimitError(err) ? err.message : 'Failed to generate chart data');
         console.error('Failed to fetch chart data from /api/estimate/chart:', err);
       } finally {
         setLoading(false);

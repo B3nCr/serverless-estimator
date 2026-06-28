@@ -28,6 +28,10 @@ export class BackendStack extends cdk.Stack {
         allowMethods: ['GET', 'POST', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization'],
       },
+      deployOptions: {
+        throttlingRateLimit: 10,
+        throttlingBurstLimit: 50,
+      },
     });
 
     const lambdaIntegration = new apigateway.LambdaIntegration(costEstimatorLambda);

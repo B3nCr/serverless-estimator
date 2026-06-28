@@ -1,5 +1,26 @@
 import axios from 'axios';
 
+export class RateLimitError extends Error {
+  constructor() {
+    super('Too many requests — please wait a moment and try again.');
+    this.name = 'RateLimitError';
+  }
+}
+
+export function isRateLimitError(err: unknown): err is RateLimitError {
+  return err instanceof RateLimitError;
+}
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 429) {
+      return Promise.reject(new RateLimitError());
+    }
+    return Promise.reject(error);
+  }
+);
+
 export interface EstimationParams {
   requestsPerMonth: number;
   averageRequestDurationMs: number;
