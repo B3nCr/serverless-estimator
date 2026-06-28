@@ -37,3 +37,4 @@ coverage
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+infrastructure/cdk-outputs.json

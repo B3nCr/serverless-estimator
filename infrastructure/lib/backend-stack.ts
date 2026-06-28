@@ -5,6 +5,8 @@ import { Construct } from 'constructs';
 import * as path from 'path';
 
 export class BackendStack extends cdk.Stack {
+  readonly apiUrl: string;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -22,7 +24,7 @@ export class BackendStack extends cdk.Stack {
       restApiName: 'Cost Estimator Service',
       description: 'API for serverless vs Kubernetes cost estimation',
       defaultCorsPreflightOptions: {
-        allowOrigins: ['http://localhost:5173'],
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: ['GET', 'POST', 'OPTIONS'],
         allowHeaders: ['Content-Type', 'Authorization'],
       },
@@ -36,7 +38,8 @@ export class BackendStack extends cdk.Stack {
     // Apply tags to all resources
     cdk.Tags.of(this).add('project', 'serverless-cost');
 
-    // Outputs
+    this.apiUrl = api.url;
+
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.url,
       description: 'Cost Estimator API URL',
