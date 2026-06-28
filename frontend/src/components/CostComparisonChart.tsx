@@ -165,8 +165,9 @@ const CostComparisonChart = ({ params }: CostComparisonChartProps) => {
 
       <div className="chart-note">
         <small>
-          Note: This chart uses a logarithmic scale for request volume to better visualize the cost differences
-          across a wide range of request volumes.
+          The chart range is auto-centred around the crossover point where serverless becomes more expensive than Kubernetes.
+          The X-axis uses a logarithmic scale. Node counts (lower chart) increase in steps as request volume requires
+          additional capacity for either RPS throughput or concurrent memory — whichever is the binding constraint.
         </small>
       </div>
     </div>

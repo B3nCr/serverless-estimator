@@ -40,11 +40,14 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           value={params.workloadProfile}
           onChange={handleChange}
         >
-          <option value="lightweight">Lightweight — cached or static responses</option>
-          <option value="standard">Standard — typical DB-backed API</option>
-          <option value="heavy">Heavy — multiple queries or external calls</option>
-          <option value="compute">Compute — ML inference, image processing</option>
+          <option value="lightweight">Lightweight — cached or static responses (~200 req/s per vCPU)</option>
+          <option value="standard">Standard — typical DB-backed API (~50 req/s per vCPU)</option>
+          <option value="heavy">Heavy — multiple queries or external calls (~15 req/s per vCPU)</option>
+          <option value="compute">Compute — ML inference, image processing (~3 req/s per vCPU)</option>
         </select>
+        <small className="form-hint">
+          Different workloads saturate a node in fundamentally different ways. A cached response barely touches the CPU — a node can handle hundreds of requests per second. An ML inference job might hold a full core for hundreds of milliseconds, meaning a node handles only a handful simultaneously. This is the key driver of how quickly your Kubernetes cluster needs to grow as traffic increases: compute-heavy workloads require significantly more nodes at the same request volume, and benefit from memory-optimized or compute-optimized instance families rather than general-purpose ones.
+        </small>
         {params.workloadProfile === 'heavy' && (
           <small className="form-hint">
             For async-heavy workloads, AWS Step Functions (Express) can reduce costs by billing Lambda only for actual compute time rather than total wait time — but this tool models Lambda + API Gateway only.
@@ -119,6 +122,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           min="1"
           max="10"
         />
+        <small className="form-hint">
+          Kubernetes must be sized for peak load, not average. A multiplier of 3 means peak traffic is assumed to be 3× the average monthly rate — both RPS capacity and concurrent memory are scaled accordingly.
+        </small>
       </div>
       
       <h3>Kubernetes Configuration</h3>
