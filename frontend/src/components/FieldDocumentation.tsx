@@ -29,6 +29,7 @@ const FieldDocumentation = () => {
           <li><a href="#api-gateway-type">API Gateway Type</a></li>
           <li><a href="#ec2-instance-type">EC2 Instance Type</a></li>
           <li><a href="#minimum-nodes">Minimum Nodes</a></li>
+          <li><a href="#nat-gateway">NAT Gateway</a></li>
         </ul>
       </nav>
 
@@ -194,6 +195,31 @@ const FieldDocumentation = () => {
           A higher minimum node floor raises the base cost of Kubernetes, which moves the
           inflection point earlier — serverless becomes relatively cheaper at lower request volumes
           when your Kubernetes baseline is more expensive.
+        </p>
+      </section>
+
+      <section id="nat-gateway" className="docs-section">
+        <h2>NAT Gateway</h2>
+        <p>
+          Controls whether NAT Gateway costs are included in the Kubernetes estimate.
+        </p>
+        <p>
+          In a standard EKS setup, worker nodes run in private subnets and require a NAT Gateway
+          in each availability zone to make outbound connections to the internet — pulling container
+          images, calling external APIs, sending logs to CloudWatch, and so on. A NAT Gateway costs
+          $0.045/hour plus $0.045/GB of data processed.
+        </p>
+        <p>
+          This setting includes the fixed hourly cost only, calculated as one NAT Gateway per AZ
+          (<code>min(node count, 3)</code> AZs). Data processing costs are not included as they
+          depend on outbound traffic volume, which varies too much by workload to model generically.
+        </p>
+        <p>
+          Uncheck this if your pods communicate exclusively with internal AWS services via VPC
+          endpoints (e.g. ECR, S3, DynamoDB, CloudWatch all have VPC endpoint support). In that
+          case no NAT Gateway is required and the cost does not apply. This is increasingly common
+          in security-conscious environments that want to avoid routing internal traffic over the
+          public internet.
         </p>
       </section>
     </div>

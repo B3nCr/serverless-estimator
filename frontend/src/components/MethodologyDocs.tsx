@@ -143,7 +143,7 @@ const MethodologyDocs = () => {
         <ul>
           <li>The serverless model assumes Lambda + API Gateway only. It does not include Step Functions, SQS, SNS, DynamoDB, or other services.</li>
           <li>The Kubernetes model assumes EKS on EC2. EKS Fargate, self-managed K8s, and ECS are not modelled.</li>
-          <li>NAT Gateway costs are not included (can be significant for private subnets).</li>
+          <li>NAT Gateway fixed hourly cost is included when the NAT Gateway option is enabled (default on). Data processing costs ($0.045/GB) are not included as they are too workload-specific to model generically.</li>
           <li>Cross-AZ data transfer costs are not included.</li>
           <li>Kubernetes assumes a single cluster. Multi-cluster or multi-region architectures are out of scope.</li>
         </ul>

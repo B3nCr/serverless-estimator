@@ -16,13 +16,17 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
     workloadProfile: 'standard',
     apiGatewayType: 'REST',
     ec2InstanceType: '',
+    natGateway: true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setParams({
       ...params,
-      [name]: ['region', 'ec2InstanceType', 'apiGatewayType', 'workloadProfile'].includes(name) ? value : Number(value)
+      [name]: type === 'checkbox' ? checked
+        : ['region', 'ec2InstanceType', 'apiGatewayType', 'workloadProfile'].includes(name) ? value
+        : Number(value)
     });
   };
 
@@ -177,6 +181,22 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
         />
         <small className="form-hint">
           Set higher for multi-AZ redundancy, e.g. 3. <Link to="/docs#minimum-nodes">Learn more</Link>
+        </small>
+      </div>
+
+      <div className="form-group checkbox-group">
+        <label htmlFor="natGateway">
+          <input
+            type="checkbox"
+            id="natGateway"
+            name="natGateway"
+            checked={params.natGateway ?? true}
+            onChange={handleChange}
+          />
+          Include NAT Gateway cost
+        </label>
+        <small className="form-hint">
+          Uncheck if pods only call internal AWS services via VPC endpoints. <Link to="/docs#nat-gateway">Learn more</Link>
         </small>
       </div>
 

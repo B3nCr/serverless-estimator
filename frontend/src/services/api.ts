@@ -31,6 +31,7 @@ export interface EstimationParams {
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   minimumNodes?: number;
+  natGateway?: boolean;
 }
 
 export interface ChartEstimationParams {
@@ -42,6 +43,7 @@ export interface ChartEstimationParams {
   apiGatewayType?: 'REST' | 'HTTP';
   ec2InstanceType?: string;
   minimumNodes?: number;
+  natGateway?: boolean;
 }
 
 export interface CostBreakdown {

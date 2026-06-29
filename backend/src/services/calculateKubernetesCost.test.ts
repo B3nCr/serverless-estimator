@@ -31,7 +31,7 @@ describe('calculateKubernetesCost', () => {
 
         // Verify total is sum of components
         const sum = result.computeCost + result.requestCost +
-            result.networkCost + result.storageCost + result.managementCost;
+            result.networkCost + result.storageCost + result.managementCost + result.natGatewayCost;
         expect(result.totalCost).toBeCloseTo(sum, 10);
     });
 
@@ -153,6 +153,7 @@ describe('calculateKubernetesCost', () => {
                 averageMemoryMb: 128,
                 region: 'us-east-1',
                 peakMultiplier: 3,
+                natGateway: false,
                 // no ec2InstanceType — auto-selected as t3.medium (128MB standard → 30×128=3840MB → t3.medium)
             };
             const result = calculateKubernetesCost(params);
@@ -169,7 +170,30 @@ describe('calculateKubernetesCost', () => {
             expect(result.storageCost).toBeCloseTo(4.00, 4);
             // EKS: $0.10/hr × 720hr
             expect(result.managementCost).toBeCloseTo(72.00, 4);
+            expect(result.natGatewayCost).toBe(0);
             expect(result.totalCost).toBeCloseTo(152.97, 1);
+        });
+
+    it('NAT Gateway cost uses min(nodeCount, 3) AZs at $0.045/hr each', () => {
+            // 2-node cluster → 2 AZs → 2 × $0.045 × 24 × 30 = $64.80
+            const result2 = calculateKubernetesCost({
+                requestsPerMonth: 1_000_000,
+                averageRequestDurationMs: 100,
+                averageMemoryMb: 128,
+                natGateway: true,
+            });
+            expect(result2.nodeCount).toBe(2);
+            expect(result2.natGatewayCost).toBeCloseTo(64.80, 2);
+
+            // Force 6 nodes → capped at 3 AZs → 3 × $0.045 × 24 × 30 = $97.20
+            const result6 = calculateKubernetesCost({
+                requestsPerMonth: 1_000_000,
+                averageRequestDurationMs: 100,
+                averageMemoryMb: 128,
+                minimumNodes: 6,
+                natGateway: true,
+            });
+            expect(result6.natGatewayCost).toBeCloseTo(97.20, 2);
         });
     });
 });

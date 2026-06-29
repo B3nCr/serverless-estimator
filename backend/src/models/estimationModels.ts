@@ -16,6 +16,7 @@ export interface EstimationParams {
   // Kubernetes specific overrides
   ec2InstanceType?: string;
   minimumNodes?: number;
+  natGateway?: boolean;
 }
 
 /**
@@ -29,6 +30,7 @@ export interface ChartEstimationParams {
   workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
   ec2InstanceType?: string;
   minimumNodes?: number;
+  natGateway?: boolean;
 }
 
 /**
@@ -89,4 +91,5 @@ export interface ChartComparisonResult {
 export interface KubernetesCostBreakdown extends CostBreakdown {
   nodeCount: number;
   instanceType: string;
+  natGatewayCost: number;
 }

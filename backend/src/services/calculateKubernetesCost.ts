@@ -42,6 +42,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     region = 'us-east-1',
     ec2InstanceType,
     minimumNodes = 2,
+    natGateway = true,
   } = params;
 
   // EKS pricing
@@ -123,8 +124,13 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
   // Management cost (EKS)
   const managementCost = eksClusterPrice;
 
+  // NAT Gateway cost — one per AZ, capped at 3 AZs
+  const azCount = Math.min(totalNodes, 3);
+  const natGatewayHourlyRate = 0.045;
+  const natGatewayCost = natGateway ? azCount * natGatewayHourlyRate * 24 * 30 : 0;
+
   // Total cost
-  const totalCost = computeCost + requestCost + networkCost + storageCost + managementCost;
+  const totalCost = computeCost + requestCost + networkCost + storageCost + managementCost + natGatewayCost;
 
   return {
     computeCost,
@@ -132,6 +138,7 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     networkCost,
     storageCost,
     managementCost,
+    natGatewayCost,
     totalCost,
     currency: 'USD',
     nodeCount: totalNodes,
