@@ -184,17 +184,19 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
         </small>
       </div>
 
-      <div className="form-group checkbox-group">
-        <label htmlFor="natGateway">
-          <input
-            type="checkbox"
-            id="natGateway"
-            name="natGateway"
-            checked={params.natGateway ?? true}
-            onChange={handleChange}
-          />
-          Include NAT Gateway cost
-        </label>
+      <div className="form-group">
+        <div className="checkbox-group">
+          <label htmlFor="natGateway">
+            <input
+              type="checkbox"
+              id="natGateway"
+              name="natGateway"
+              checked={params.natGateway ?? true}
+              onChange={handleChange}
+            />
+            Include NAT Gateway cost
+          </label>
+        </div>
         <small className="form-hint">
           Uncheck if pods only call internal AWS services via VPC endpoints. <Link to="/docs#nat-gateway">Learn more</Link>
         </small>
