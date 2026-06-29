@@ -265,7 +265,7 @@ button:disabled {
 .inflection-point-info {
   padding: 0.75rem;
   background-color: #f8f9fa;
-  border-left: 4px solid #0066cc;
+  border-left: 4px solid #666;
   margin-bottom: 1rem;
 }
 
@@ -290,8 +290,8 @@ button:disabled {
 
 .kubernetes-info {
   padding: 0.75rem;
-  background-color: #e8f5e9;
-  border-left: 4px solid #4caf50;
+  background-color: #f8f9fa;
+  border-left: 4px solid #666;
   margin-bottom: 1rem;
 }
 
@@ -392,4 +392,119 @@ button:disabled {
   margin-top: 0.75rem;
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  input[type="number"], select {
+    background-color: #2a2a2a;
+    color: inherit;
+    border-color: #555;
+  }
+
+  .error {
+    background-color: #2a0a0a;
+    border-color: #d32f2f;
+  }
+
+  .results, .cost-card, .cost-chart-container {
+    border-color: #444;
+  }
+
+  .infrastructure-diagram {
+    border-color: #444;
+  }
+
+  .expand-button {
+    background-color: #2a2a2a;
+    color: inherit;
+    border-color: #555;
+  }
+
+  .expand-button:hover {
+    background-color: #3a3a3a;
+  }
+
+  .component {
+    background-color: #2a2a2a;
+    border-color: #555;
+  }
+
+  .serverless .api-gateway {
+    background-color: #0d1f2d;
+    border-color: #1e4a7a;
+  }
+
+  .serverless .lambda {
+    background-color: #2a2000;
+    border-color: #5a4a00;
+  }
+
+  .kubernetes .load-balancer {
+    background-color: #0d1f0d;
+    border-color: #2a5a2a;
+  }
+
+  .kubernetes .k8s-cluster {
+    background-color: #0d1f22;
+    border-color: #1a5a66;
+  }
+
+  .sub-component {
+    background-color: #1a1a1a;
+    border-color: #555;
+  }
+
+  .visualization-note, .chart-note {
+    color: #aaa;
+  }
+
+  .inflection-point-info,
+  .kubernetes-info {
+    background-color: #1e2226;
+    border-left-color: #888;
+  }
+
+  .cost-docs {
+    border-color: #444;
+  }
+
+  button.docs-toggle {
+    background-color: #2a2a2a;
+    color: inherit;
+    border: 1px solid #444;
+  }
+
+  button.docs-toggle:hover {
+    background-color: #333;
+    border-color: #666;
+  }
+
+  .docs-content {
+    background-color: #1a1a1a;
+  }
+
+  .docs-content h3 {
+    color: #ddd;
+  }
+
+  .calculation-section {
+    border-bottom-color: #333;
+  }
+
+  .calculation-section h4 {
+    color: #bbb;
+  }
+
+  .formula {
+    background-color: #1e2026;
+    border-left-color: #4499ff;
+  }
+
+  .chart-loading, .chart-empty {
+    border-color: #444;
+  }
+
+  .node-info {
+    border-top-color: #444;
+  }
 }
