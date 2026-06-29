@@ -66,6 +66,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           min="1"
           required
         />
+        <small className="form-hint">
+          How long a single request takes end-to-end. For Lambda this drives compute cost directly (billed per ms). For Kubernetes it determines how many concurrent requests a pod can handle, which sets the number of pods and nodes required at a given RPS.
+        </small>
       </div>
 
       <div className="form-group">
@@ -79,6 +82,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           min="128"
           required
         />
+        <small className="form-hint">
+          Peak memory consumed per request. For Lambda this feeds into GB-second billing and must be set at allocation time. For Kubernetes it determines how many pods fit on a node, directly influencing which instance SKU is selected and how quickly the cluster must scale.
+        </small>
       </div>
 
       <div className="form-group">
@@ -96,19 +102,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="eu-west-1">EU (Ireland)</option>
           <option value="eu-central-1">EU (Frankfurt)</option>
         </select>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="apiGatewayType">API Gateway Type</label>
-        <select
-          id="apiGatewayType"
-          name="apiGatewayType"
-          value={params.apiGatewayType}
-          onChange={handleChange}
-        >
-          <option value="REST">REST API</option>
-          <option value="HTTP">HTTP API</option>
-        </select>
+        <small className="form-hint">
+          Applies to both sides of the comparison — Lambda and EC2 pricing both vary by region. Choose the region where your workload will actually run.
+        </small>
       </div>
 
       <div className="form-group">
@@ -127,6 +123,24 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
         </small>
       </div>
       
+      <h3>Serverless Configuration</h3>
+
+      <div className="form-group">
+        <label htmlFor="apiGatewayType">API Gateway Type</label>
+        <select
+          id="apiGatewayType"
+          name="apiGatewayType"
+          value={params.apiGatewayType}
+          onChange={handleChange}
+        >
+          <option value="REST">REST API</option>
+          <option value="HTTP">HTTP API</option>
+        </select>
+        <small className="form-hint">
+          AWS offers two API Gateway flavours with different pricing. HTTP API ($1.00/million requests) is cheaper but has fewer features. REST API ($3.50/million requests) supports advanced routing, request validation, and usage plans. Choose whichever matches your serverless architecture.
+        </small>
+      </div>
+
       <h3>Kubernetes Configuration</h3>
 
       <div className="form-group">
@@ -149,6 +163,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="c5.xlarge">c5.xlarge (8GB RAM)</option>
           <option value="c5.2xlarge">c5.2xlarge (16GB RAM)</option>
         </select>
+        <small className="form-hint">
+          The EC2 instance type used for Kubernetes worker nodes. Auto selects the smallest instance whose RAM fits your pod memory requirements with headroom for the k8s system overhead. Override this to model a specific fleet you already operate or to compare instance families.
+        </small>
       </div>
 
       <div className="form-group">
