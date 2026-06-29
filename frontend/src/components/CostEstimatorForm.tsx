@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChartEstimationParams } from '../services/api';
 
 interface CostEstimatorFormProps {
@@ -46,13 +47,8 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="compute">Compute — ML inference, image processing (~3 req/s per vCPU)</option>
         </select>
         <small className="form-hint">
-          Different workloads saturate a node in fundamentally different ways. A cached response barely touches the CPU — a node can handle hundreds of requests per second. An ML inference job might hold a full core for hundreds of milliseconds, meaning a node handles only a handful simultaneously. This is the key driver of how quickly your Kubernetes cluster needs to grow as traffic increases: compute-heavy workloads require significantly more nodes at the same request volume, and benefit from memory-optimized or compute-optimized instance families rather than general-purpose ones.
+          How each request uses compute — the key driver of Kubernetes node count scaling. <Link to="/docs#workload-profile">Learn more</Link>
         </small>
-        {params.workloadProfile === 'heavy' && (
-          <small className="form-hint">
-            For async-heavy workloads, AWS Step Functions (Express) can reduce costs by billing Lambda only for actual compute time rather than total wait time — but this tool models Lambda + API Gateway only.
-          </small>
-        )}
       </div>
 
       <div className="form-group">
@@ -67,7 +63,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           required
         />
         <small className="form-hint">
-          How long a single request takes end-to-end. For Lambda this drives compute cost directly (billed per ms). For Kubernetes it determines how many concurrent requests a pod can handle, which sets the number of pods and nodes required at a given RPS.
+          Lambda bills per ms; Kubernetes uses this to size pod concurrency. <Link to="/docs#request-duration">Learn more</Link>
         </small>
       </div>
 
@@ -83,7 +79,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           required
         />
         <small className="form-hint">
-          Peak memory consumed per request. For Lambda this feeds into GB-second billing and must be set at allocation time. For Kubernetes it determines how many pods fit on a node, directly influencing which instance SKU is selected and how quickly the cluster must scale.
+          Affects Lambda GB-second cost and how many pods fit on a Kubernetes node. <Link to="/docs#memory">Learn more</Link>
         </small>
       </div>
 
@@ -103,7 +99,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="eu-central-1">EU (Frankfurt)</option>
         </select>
         <small className="form-hint">
-          Applies to both sides of the comparison — Lambda and EC2 pricing both vary by region. Choose the region where your workload will actually run.
+          Lambda and EC2 pricing both vary by region. <Link to="/docs#region">Learn more</Link>
         </small>
       </div>
 
@@ -119,10 +115,10 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           max="10"
         />
         <small className="form-hint">
-          Kubernetes must be sized for peak load, not average. A multiplier of 3 means peak traffic is assumed to be 3× the average monthly rate — both RPS capacity and concurrent memory are scaled accordingly.
+          Kubernetes is sized for peak, not average — this multiplies the monthly rate to model burst capacity. <Link to="/docs#peak-multiplier">Learn more</Link>
         </small>
       </div>
-      
+
       <h3>Serverless Configuration</h3>
 
       <div className="form-group">
@@ -133,11 +129,11 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           value={params.apiGatewayType}
           onChange={handleChange}
         >
-          <option value="REST">REST API</option>
-          <option value="HTTP">HTTP API</option>
+          <option value="REST">REST API ($3.50/million requests)</option>
+          <option value="HTTP">HTTP API ($1.00/million requests)</option>
         </select>
         <small className="form-hint">
-          AWS offers two API Gateway flavours with different pricing. HTTP API ($1.00/million requests) is cheaper but has fewer features. REST API ($3.50/million requests) supports advanced routing, request validation, and usage plans. Choose whichever matches your serverless architecture.
+          HTTP API is cheaper; REST API has more features. <Link to="/docs#api-gateway-type">Learn more</Link>
         </small>
       </div>
 
@@ -164,7 +160,7 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           <option value="c5.2xlarge">c5.2xlarge (16GB RAM)</option>
         </select>
         <small className="form-hint">
-          The EC2 instance type used for Kubernetes worker nodes. Auto selects the smallest instance whose RAM fits your pod memory requirements with headroom for the k8s system overhead. Override this to model a specific fleet you already operate or to compare instance families.
+          Auto selects the right instance for your pod memory. Override to model a specific fleet. <Link to="/docs#ec2-instance-type">Learn more</Link>
         </small>
       </div>
 
@@ -179,7 +175,9 @@ const CostEstimatorForm = ({ onSubmit, isLoading }: CostEstimatorFormProps) => {
           min="2"
           placeholder="2 (default)"
         />
-        <small className="form-hint">Set higher for multi-AZ redundancy requirements, e.g. 3</small>
+        <small className="form-hint">
+          Set higher for multi-AZ redundancy, e.g. 3. <Link to="/docs#minimum-nodes">Learn more</Link>
+        </small>
       </div>
 
       <button type="submit" disabled={isLoading}>
