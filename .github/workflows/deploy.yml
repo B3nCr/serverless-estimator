@@ -76,6 +76,9 @@ jobs:
         run: npm run build-backend
         working-directory: infrastructure
 
+      - name: Create frontend dist placeholder
+        run: mkdir -p frontend/dist
+
       - name: Deploy backend stack
         run: npx cdk deploy BackendStack --outputs-file cdk-outputs.json --require-approval never
         working-directory: infrastructure
