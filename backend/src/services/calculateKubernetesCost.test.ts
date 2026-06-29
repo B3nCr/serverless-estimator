@@ -162,8 +162,9 @@ describe('calculateKubernetesCost', () => {
             expect(result.nodeCount).toBe(2);
             // 2 × $0.0416/hr × 720hr/month
             expect(result.computeCost).toBeCloseTo(59.90, 1);
-            // ALB base $16.20 + 1 LCU × $0.000005 × 720hr
-            expect(result.requestCost).toBeCloseTo(16.20, 1);
+            // ALB: ($0.008 base + 1 LCU × $0.008) × 720hr = $11.52
+            // 1M req/month = 0.386 req/s → ceil(0.386/25) = 1 LCU
+            expect(result.requestCost).toBeCloseTo(11.52, 1);
             // 1M × 10KB / 1048576 GB × $0.09/GB
             expect(result.networkCost).toBeCloseTo(0.8583, 3);
             // 2 nodes × 20GB × $0.10/GB-month
@@ -171,7 +172,7 @@ describe('calculateKubernetesCost', () => {
             // EKS: $0.10/hr × 720hr
             expect(result.managementCost).toBeCloseTo(72.00, 4);
             expect(result.natGatewayCost).toBe(0);
-            expect(result.totalCost).toBeCloseTo(152.97, 1);
+            expect(result.totalCost).toBeCloseTo(148.28, 1);
         });
 
     it('NAT Gateway cost uses min(nodeCount, 3) AZs at $0.045/hr each', () => {
