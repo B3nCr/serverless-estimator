@@ -32,6 +32,23 @@ function selectInstanceType(averageMemoryMb: number, workloadProfile: string): s
   return sizes.find(s => neededMb <= s.threshold)!.name;
 }
 
+// ALB bills $0.008/hour base + $0.008/LCU-hour, where LCU is the max across:
+//   new connections (25/sec), processed bytes (1 GB/hour), rule evaluations (1000/sec).
+// averageResponseSizeKb is used for the bytes dimension; new connections wins for typical APIs.
+function calculateAlbMonthlyCost(requestsPerSecond: number, averageResponseSizeKb: number): number {
+  const albBasePrice = 0.008; // per ALB-hour
+  const albLcuPrice  = 0.008; // per LCU-hour
+  const hoursPerMonth = 24 * 30;
+
+  const lcuFromConnections = requestsPerSecond / 25;
+  const lcuFromBytes       = (requestsPerSecond * averageResponseSizeKb * 3600) / (1024 * 1024);
+  const lcuFromRules       = requestsPerSecond / 1000;
+
+  const lcuCount = Math.ceil(Math.max(lcuFromConnections, lcuFromBytes, lcuFromRules));
+
+  return (albBasePrice + lcuCount * albLcuPrice) * hoursPerMonth;
+}
+
 export function calculateKubernetesCost(params: EstimationParams): KubernetesCostBreakdown {
   const {
     requestsPerMonth,
@@ -94,23 +111,10 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
   const computeCost = totalNodes * nodePrice;
 
   // ALB (Application Load Balancer) costs for Kubernetes
-  const albHourlyPrice = 0.0225; // $0.0225 per hour
-  const albMonthlyPrice = albHourlyPrice * 24 * 30; // Monthly cost
-
-
-  // ALB request pricing
-  const albRequestPrice = 0.005 / 1000; // $0.005 per 1000 LCU-hours
-
-  // Calculate LCU (Load Balancer Capacity Units) based on requests
-  // 1 LCU = 1 connection per second, 1 GB per hour, 1000 new connections per minute
-  const lcuForRequests = Math.ceil(requestsPerSecond / 25); // Assuming 25 requests per second per LCU
-  const lcuCost = lcuForRequests * albRequestPrice * 24 * 30;
-
-  // Total request cost
-  const requestCost = albMonthlyPrice + lcuCost;
+  const averageResponseSizeKb = 10;
+  const requestCost = calculateAlbMonthlyCost(requestsPerSecond, averageResponseSizeKb);
 
   // Network cost (estimate)
-  const averageResponseSizeKb = 10; // Assumption: 10KB response size
   const dataTransferGBPerRequest = averageResponseSizeKb / (1024 * 1024); // Convert KB to GB
   const dataTransferPrice = 0.09; // $0.09 per GB for first 10TB out
   const totalDataTransferGB = requestsPerMonth * dataTransferGBPerRequest;
