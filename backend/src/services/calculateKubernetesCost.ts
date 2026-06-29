@@ -1,5 +1,8 @@
 import { EstimationParams, KubernetesCostBreakdown } from '../models/estimationModels';
 
+const HOURS_PER_MONTH = 24 * 30;
+const AVERAGE_RESPONSE_SIZE_KB = 10;
+
 // Pick the instance family from workload profile, then the smallest size that
 // can comfortably hold ~30 concurrent requests worth of memory.
 function selectInstanceType(averageMemoryMb: number, workloadProfile: string): string {
@@ -32,13 +35,16 @@ function selectInstanceType(averageMemoryMb: number, workloadProfile: string): s
   return sizes.find(s => neededMb <= s.threshold)!.name;
 }
 
+function calculateComputeMonthlyCost(totalNodes: number, instancePricePerHour: number): number {
+  return totalNodes * instancePricePerHour * HOURS_PER_MONTH;
+}
+
 // ALB bills $0.008/hour base + $0.008/LCU-hour, where LCU is the max across:
 //   new connections (25/sec), processed bytes (1 GB/hour), rule evaluations (1000/sec).
-// averageResponseSizeKb is used for the bytes dimension; new connections wins for typical APIs.
+// New connections wins for typical API workloads; bytes only takes over at ~860KB+ responses.
 function calculateAlbMonthlyCost(requestsPerSecond: number, averageResponseSizeKb: number): number {
   const albBasePrice = 0.008; // per ALB-hour
   const albLcuPrice  = 0.008; // per LCU-hour
-  const hoursPerMonth = 24 * 30;
 
   const lcuFromConnections = requestsPerSecond / 25;
   const lcuFromBytes       = (requestsPerSecond * averageResponseSizeKb * 3600) / (1024 * 1024);
@@ -46,7 +52,28 @@ function calculateAlbMonthlyCost(requestsPerSecond: number, averageResponseSizeK
 
   const lcuCount = Math.ceil(Math.max(lcuFromConnections, lcuFromBytes, lcuFromRules));
 
-  return (albBasePrice + lcuCount * albLcuPrice) * hoursPerMonth;
+  return (albBasePrice + lcuCount * albLcuPrice) * HOURS_PER_MONTH;
+}
+
+function calculateNetworkMonthlyCost(requestsPerMonth: number, averageResponseSizeKb: number): number {
+  const dataTransferPrice = 0.09; // $0.09 per GB for first 10TB out
+  const totalDataTransferGB = requestsPerMonth * (averageResponseSizeKb / (1024 * 1024));
+  return totalDataTransferGB * dataTransferPrice;
+}
+
+function calculateStorageMonthlyCost(totalNodes: number): number {
+  const storagePerNode = 20; // GB per node
+  const ebsPrice = 0.10; // $0.10 per GB-month (gp2)
+  return totalNodes * storagePerNode * ebsPrice;
+}
+
+function calculateEksMonthlyCost(): number {
+  return 0.10 * HOURS_PER_MONTH; // $0.10 per cluster-hour
+}
+
+function calculateNatGatewayMonthlyCost(azCount: number): number {
+  const natGatewayHourlyRate = 0.045;
+  return azCount * natGatewayHourlyRate * HOURS_PER_MONTH;
 }
 
 export function calculateKubernetesCost(params: EstimationParams): KubernetesCostBreakdown {
@@ -56,24 +83,18 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     averageMemoryMb,
     peakMultiplier = 3,
     workloadProfile = 'standard',
-    region = 'us-east-1',
     ec2InstanceType,
     minimumNodes = 2,
     natGateway = true,
   } = params;
 
-  // EKS pricing
-  const eksClusterPrice = 0.10 * 24 * 30;
-
-  // RPS capacity per vCPU by workload profile
   const rpsPerVcpu: Record<string, number> = {
-    lightweight: 200, // cached/static responses
-    standard:     50, // typical DB-backed API
-    heavy:        15, // multiple queries, external calls
-    compute:       3, // ML inference, image processing
+    lightweight: 200,
+    standard:     50,
+    heavy:        15,
+    compute:       3,
   };
 
-  // EC2 instance type configuration
   const instanceTypes: { [key: string]: any; } = {
     't3.small':   { price: 0.0208, memory: 2 * 1024,  vCpus: 2 },
     't3.medium':  { price: 0.0416, memory: 4 * 1024,  vCpus: 2 },
@@ -87,53 +108,27 @@ export function calculateKubernetesCost(params: EstimationParams): KubernetesCos
     'c5.2xlarge': { price: 0.34,   memory: 16 * 1024, vCpus: 8 },
   };
 
-  // Auto-select instance type from workload characteristics if not explicitly provided
   const selectedInstanceType = (ec2InstanceType && instanceTypes[ec2InstanceType])
     ? ec2InstanceType
     : selectInstanceType(averageMemoryMb, workloadProfile);
 
   const instanceConfig = instanceTypes[selectedInstanceType];
-  const nodePrice = instanceConfig.price * 24 * 30; // hourly price * 24 hours * 30 days
-  const memoryPerNode = instanceConfig.memory; // Memory in MB
 
   const requestsPerSecond = requestsPerMonth / (30 * 24 * 60 * 60);
-
   const peakRPS = requestsPerSecond * peakMultiplier;
-  const rpsCapacityPerNode = instanceConfig.vCpus * rpsPerVcpu[workloadProfile];
-  const nodesForRPS = Math.ceil(peakRPS / rpsCapacityPerNode);
 
+  const nodesForRPS = Math.ceil(peakRPS / (instanceConfig.vCpus * rpsPerVcpu[workloadProfile]));
   const sustainedMemoryMb = requestsPerSecond * averageMemoryMb * (averageRequestDurationMs / 1000);
-  const nodesForMemory = Math.ceil((sustainedMemoryMb * peakMultiplier) / memoryPerNode);
-
+  const nodesForMemory = Math.ceil((sustainedMemoryMb * peakMultiplier) / instanceConfig.memory);
   const totalNodes = Math.max(minimumNodes, nodesForRPS, nodesForMemory);
 
-  // Compute cost
-  const computeCost = totalNodes * nodePrice;
+  const computeCost    = calculateComputeMonthlyCost(totalNodes, instanceConfig.price);
+  const requestCost    = calculateAlbMonthlyCost(requestsPerSecond, AVERAGE_RESPONSE_SIZE_KB);
+  const networkCost    = calculateNetworkMonthlyCost(requestsPerMonth, AVERAGE_RESPONSE_SIZE_KB);
+  const storageCost    = calculateStorageMonthlyCost(totalNodes);
+  const managementCost = calculateEksMonthlyCost();
+  const natGatewayCost = natGateway ? calculateNatGatewayMonthlyCost(Math.min(totalNodes, 3)) : 0;
 
-  // ALB (Application Load Balancer) costs for Kubernetes
-  const averageResponseSizeKb = 10;
-  const requestCost = calculateAlbMonthlyCost(requestsPerSecond, averageResponseSizeKb);
-
-  // Network cost (estimate)
-  const dataTransferGBPerRequest = averageResponseSizeKb / (1024 * 1024); // Convert KB to GB
-  const dataTransferPrice = 0.09; // $0.09 per GB for first 10TB out
-  const totalDataTransferGB = requestsPerMonth * dataTransferGBPerRequest;
-  const networkCost = totalDataTransferGB * dataTransferPrice;
-
-  // Storage cost (EBS volumes)
-  const storagePerNode = 20; // 20 GB per node
-  const ebsPrice = 0.10; // $0.10 per GB-month
-  const storageCost = totalNodes * storagePerNode * ebsPrice;
-
-  // Management cost (EKS)
-  const managementCost = eksClusterPrice;
-
-  // NAT Gateway cost — one per AZ, capped at 3 AZs
-  const azCount = Math.min(totalNodes, 3);
-  const natGatewayHourlyRate = 0.045;
-  const natGatewayCost = natGateway ? azCount * natGatewayHourlyRate * 24 * 30 : 0;
-
-  // Total cost
   const totalCost = computeCost + requestCost + networkCost + storageCost + managementCost + natGatewayCost;
 
   return {
