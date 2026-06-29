@@ -13,6 +13,19 @@
   border-bottom: 1px solid #ddd;
 }
 
+.site-nav-github {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  color: #0066cc;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.site-nav-github:hover {
+  opacity: 1;
+}
+
 .site-nav-group {
   display: flex;
   gap: 1rem;
@@ -417,6 +430,10 @@ button:disabled {
   }
 
   .site-nav a {
+    color: #4499ff;
+  }
+
+  .site-nav-github {
     color: #4499ff;
   }
 
