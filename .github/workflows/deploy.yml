@@ -72,6 +72,18 @@ jobs:
         run: npm ci
         working-directory: infrastructure
 
-      - name: Deploy
-        run: npm run deploy
+      - name: Build backend
+        run: npm run build-backend
+        working-directory: infrastructure
+
+      - name: Deploy backend stack
+        run: npx cdk deploy BackendStack --outputs-file cdk-outputs.json --require-approval never
+        working-directory: infrastructure
+
+      - name: Build frontend
+        run: npm run build-frontend
+        working-directory: infrastructure
+
+      - name: Deploy frontend stack
+        run: npx cdk deploy FrontendStack --require-approval never
         working-directory: infrastructure
