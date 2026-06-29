@@ -8,10 +8,19 @@ import GuideDocs from "./components/GuideDocs";
 import { useState } from "react";
 import { ChartEstimationParams } from "./services/api";
 
+const defaultParams: ChartEstimationParams = {
+  averageRequestDurationMs: 100,
+  averageMemoryMb: 128,
+  region: 'us-east-1',
+  peakMultiplier: 3,
+  workloadProfile: 'standard',
+  apiGatewayType: 'REST',
+  ec2InstanceType: '',
+  natGateway: true,
+};
+
 function EstimatorPage() {
-  const [chartParams, setChartParams] = useState<ChartEstimationParams | null>(
-    null,
-  );
+  const [chartParams, setChartParams] = useState<ChartEstimationParams>(defaultParams);
   const [error, setError] = useState<string | null>(null);
 
   const handleEstimate = (params: ChartEstimationParams) => {
@@ -20,25 +29,25 @@ function EstimatorPage() {
   };
 
   return (
-    <>
-      <h1>AWS Serverless vs Kubernetes Cost Estimator</h1>
-      <p>
-        Compare the cost difference between AWS serverless architecture (Lambda
-        + API Gateway) and Kubernetes architecture across different request
-        volumes. Find the inflection point where serverless becomes more
-        expensive than Kubernetes.
-      </p>
-      <p className="estimator-docs-link">
-        <Link to="/docs/methodology">How costs are calculated</Link> &middot;{" "}
-        <Link to="/docs/guide">When to use each approach</Link>
-      </p>
-
-      <CostEstimatorForm onSubmit={handleEstimate} isLoading={false} />
-
-      {error && <div className="error">{error}</div>}
-
-      {chartParams && <CostComparisonChart params={chartParams} />}
-    </>
+    <div className="estimator-layout">
+      <div className="estimator-form-col">
+        <h1>Serverless vs Kubernetes Cost Estimator</h1>
+        <p>
+          Compare AWS Lambda + API Gateway against Kubernetes on EC2 across
+          different request volumes. Find the inflection point where serverless
+          becomes more expensive.
+        </p>
+        <p className="estimator-docs-link">
+          <Link to="/docs/methodology">How costs are calculated</Link> &middot;{" "}
+          <Link to="/docs/guide">When to use each approach</Link>
+        </p>
+        <CostEstimatorForm onSubmit={handleEstimate} isLoading={false} />
+        {error && <div className="error">{error}</div>}
+      </div>
+      <div className="estimator-chart-col">
+        <CostComparisonChart params={chartParams} />
+      </div>
+    </div>
   );
 }
 
