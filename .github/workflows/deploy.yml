@@ -83,6 +83,10 @@ jobs:
         run: npx cdk deploy DnsStack --require-approval never
         working-directory: infrastructure
 
+      - name: Deploy certificate stack
+        run: npx cdk deploy CertificateStack --require-approval never
+        working-directory: infrastructure
+
       - name: Deploy backend stack
         run: npx cdk deploy BackendStack --outputs-file cdk-outputs.json --require-approval never
         working-directory: infrastructure

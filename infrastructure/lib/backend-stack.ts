@@ -1,8 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import { Construct } from 'constructs';
 import * as path from 'path';
+import { DOMAIN_NAME } from './dns-stack';
+import { APP_SUBDOMAIN } from './certificate-stack';
 
 export class BackendStack extends cdk.Stack {
   readonly apiUrl: string;
@@ -10,7 +15,17 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // Lambda function for cost estimation
+    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
+      domainName: DOMAIN_NAME,
+    });
+
+    const apiDomainName = `api.${APP_SUBDOMAIN}`;
+
+    const certificate = new acm.Certificate(this, 'ApiCertificate', {
+      domainName: `*.${APP_SUBDOMAIN}`,
+      validation: acm.CertificateValidation.fromDns(hostedZone),
+    });
+
     const costEstimatorLambda = new lambda.Function(this, 'CostEstimatorFunction', {
       runtime: lambda.Runtime.NODEJS_24_X,
       handler: 'lambda.handler',
@@ -19,10 +34,10 @@ export class BackendStack extends cdk.Stack {
       memorySize: 256,
     });
 
-    // API Gateway
     const api = new apigateway.RestApi(this, 'CostEstimatorApi', {
       restApiName: 'Cost Estimator Service',
       description: 'API for serverless vs Kubernetes cost estimation',
+      endpointTypes: [apigateway.EndpointType.REGIONAL],
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: ['GET', 'POST', 'OPTIONS'],
@@ -39,13 +54,24 @@ export class BackendStack extends cdk.Stack {
       defaultIntegration: lambdaIntegration,
     });
 
-    // Apply tags to all resources
+    const customDomain = api.addDomainName('CustomDomain', {
+      domainName: apiDomainName,
+      certificate,
+      endpointType: apigateway.EndpointType.REGIONAL,
+    });
+
+    new route53.ARecord(this, 'ApiDnsRecord', {
+      zone: hostedZone,
+      recordName: apiDomainName,
+      target: route53.RecordTarget.fromAlias(new route53Targets.ApiGatewayDomain(customDomain)),
+    });
+
     cdk.Tags.of(this).add('project', 'serverless-cost');
 
     this.apiUrl = api.url;
 
-    new cdk.CfnOutput(this, 'ApiUrl', {
-      value: api.url,
+    new cdk.CfnOutput(this, 'CustomDomainUrl', {
+      value: `https://${apiDomainName}`,
       description: 'Cost Estimator API URL',
     });
   }
