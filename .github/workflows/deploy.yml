@@ -79,6 +79,10 @@ jobs:
       - name: Create frontend dist placeholder
         run: mkdir -p frontend/dist
 
+      - name: Deploy DNS stack
+        run: npx cdk deploy DnsStack --require-approval never
+        working-directory: infrastructure
+
       - name: Deploy backend stack
         run: npx cdk deploy BackendStack --outputs-file cdk-outputs.json --require-approval never
         working-directory: infrastructure
