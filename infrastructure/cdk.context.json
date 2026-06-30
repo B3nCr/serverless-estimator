@@ -1,5 +1,13 @@
 {
   "acknowledged-issue-numbers": [
     34892
-  ]
+  ],
+  "hosted-zone:account=713916818071:domainName=b3ncr.uk:region=us-east-1": {
+    "Id": "/hostedzone/Z05304629M77NBQJ15YF",
+    "Name": "b3ncr.uk."
+  },
+  "hosted-zone:account=713916818071:domainName=b3ncr.uk:region=eu-west-2": {
+    "Id": "/hostedzone/Z05304629M77NBQJ15YF",
+    "Name": "b3ncr.uk."
+  }
 }
