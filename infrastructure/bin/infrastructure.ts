@@ -19,4 +19,6 @@ new BackendStack(app, 'BackendStack', { env });
 new FrontendStack(app, 'FrontendStack', {
   env,
   certificate: certStack.certificate,
+  cloudflareZoneId: app.node.getContext('cloudflare:zoneId'),
+  cloudflareApiTokenSecretArn: app.node.getContext('cloudflare:apiTokenSecretArn'),
 });

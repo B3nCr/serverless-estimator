@@ -95,6 +95,8 @@
     "@aws-cdk/s3-notifications:addS3TrustKeyPolicyForSnsSubscriptions": true,
     "@aws-cdk/aws-ec2:requirePrivateSubnetsForEgressOnlyInternetGateway": true,
     "@aws-cdk/aws-s3:publicAccessBlockedByDefault": true,
-    "@aws-cdk/aws-lambda:useCdkManagedLogGroup": true
+    "@aws-cdk/aws-lambda:useCdkManagedLogGroup": true,
+    "cloudflare:zoneId": "9ae8feaa8b1da3b168c24069e9e397e7",
+    "cloudflare:apiTokenSecretArn": "arn:aws:secretsmanager:eu-west-2:713916818071:secret:cloudflare/b3ncr-api-token-M61j3M"
   }
 }

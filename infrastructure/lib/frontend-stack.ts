@@ -4,15 +4,16 @@ import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import * as path from 'path';
-import { DOMAIN_NAME } from './dns-stack';
 import { APP_SUBDOMAIN } from './certificate-stack';
+import { CloudflareDnsRecord } from './cloudflare-dns-record';
 
 interface FrontendStackProps extends cdk.StackProps {
   certificate: acm.ICertificate;
+  cloudflareZoneId: string;
+  cloudflareApiTokenSecretArn: string;
 }
 
 export class FrontendStack extends cdk.Stack {
@@ -21,9 +22,11 @@ export class FrontendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: FrontendStackProps) {
     super(scope, id, { ...props, crossRegionReferences: true });
 
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-      domainName: DOMAIN_NAME,
-    });
+    const cloudflareApiTokenSecret = secretsmanager.Secret.fromSecretCompleteArn(
+      this,
+      'CloudflareApiToken',
+      props.cloudflareApiTokenSecretArn,
+    );
 
     const bucket = new s3.Bucket(this, 'FrontendBucket', {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -46,10 +49,13 @@ export class FrontendStack extends cdk.Stack {
       ],
     });
 
-    new route53.ARecord(this, 'FrontendDnsRecord', {
-      zone: hostedZone,
-      recordName: APP_SUBDOMAIN,
-      target: route53.RecordTarget.fromAlias(new route53Targets.CloudFrontTarget(distribution)),
+    new CloudflareDnsRecord(this, 'CloudflareDnsRecord', {
+      zoneId: props.cloudflareZoneId,
+      apiTokenSecret: cloudflareApiTokenSecret,
+      type: 'CNAME',
+      name: APP_SUBDOMAIN,
+      content: distribution.distributionDomainName,
+      proxied: false,
     });
 
     new s3deploy.BucketDeployment(this, 'FrontendDeployment', {
