@@ -2,28 +2,34 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import * as path from 'path';
-import { DOMAIN_NAME } from './dns-stack';
 import { APP_SUBDOMAIN } from './certificate-stack';
+import { CloudflareDnsRecord } from './cloudflare-dns-record';
+
+interface BackendStackProps extends cdk.StackProps {
+  cloudflareZoneId: string;
+  cloudflareApiTokenSecretArn: string;
+}
 
 export class BackendStack extends cdk.Stack {
   readonly apiUrl: string;
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
-    const hostedZone = route53.HostedZone.fromLookup(this, 'HostedZone', {
-      domainName: DOMAIN_NAME,
-    });
+    const cloudflareApiTokenSecret = secretsmanager.Secret.fromSecretCompleteArn(
+      this,
+      'CloudflareApiToken',
+      props.cloudflareApiTokenSecretArn,
+    );
 
     const apiDomainName = `api.${APP_SUBDOMAIN}`;
 
     const certificate = new acm.Certificate(this, 'ApiCertificate', {
       domainName: `*.${APP_SUBDOMAIN}`,
-      validation: acm.CertificateValidation.fromDns(hostedZone),
+      validation: acm.CertificateValidation.fromDns(),
     });
 
     const costEstimatorLambda = new lambda.Function(this, 'CostEstimatorFunction', {
@@ -60,10 +66,13 @@ export class BackendStack extends cdk.Stack {
       endpointType: apigateway.EndpointType.REGIONAL,
     });
 
-    new route53.ARecord(this, 'ApiDnsRecord', {
-      zone: hostedZone,
-      recordName: apiDomainName,
-      target: route53.RecordTarget.fromAlias(new route53Targets.ApiGatewayDomain(customDomain)),
+    new CloudflareDnsRecord(this, 'CloudflareDnsRecord', {
+      zoneId: props.cloudflareZoneId,
+      apiTokenSecret: cloudflareApiTokenSecret,
+      type: 'CNAME',
+      name: apiDomainName,
+      content: customDomain.domainNameAliasDomainName,
+      proxied: false,
     });
 
     cdk.Tags.of(this).add('project', 'serverless-cost');
@@ -72,7 +81,7 @@ export class BackendStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'CustomDomainUrl', {
       value: `https://${apiDomainName}`,
-      description: 'Cost Estimator API URL',
+      description: 'Cost Estimator custom domain URL',
     });
   }
 }

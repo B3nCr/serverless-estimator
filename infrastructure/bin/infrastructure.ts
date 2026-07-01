@@ -14,7 +14,11 @@ const certStack = new CertificateStack(app, 'CertificateStack', {
   env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
 });
 
-new BackendStack(app, 'BackendStack', { env });
+new BackendStack(app, 'BackendStack', {
+  env,
+  cloudflareZoneId: app.node.getContext('cloudflare:zoneId'),
+  cloudflareApiTokenSecretArn: app.node.getContext('cloudflare:apiTokenSecretArn'),
+});
 
 new FrontendStack(app, 'FrontendStack', {
   env,
