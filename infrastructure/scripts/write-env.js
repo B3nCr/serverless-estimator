@@ -14,8 +14,8 @@ if (!customDomainUrl) {
   process.exit(1);
 }
 
-const envContent = `VITE_API_URL=${customDomainUrl}\n`;
+const envContent = `VITE_API_URL=${customDomainUrl}/api\n`;
 const envPath = path.join(__dirname, '..', '..', 'frontend', '.env.production');
 fs.writeFileSync(envPath, envContent);
 console.log(`Wrote ${envPath}`);
-console.log(`VITE_API_URL=${customDomainUrl}`);
+console.log(`VITE_API_URL=${customDomainUrl}/api`);
