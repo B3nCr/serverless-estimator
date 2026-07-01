@@ -21,19 +21,6 @@ axios.interceptors.response.use(
   }
 );
 
-export interface EstimationParams {
-  requestsPerMonth: number;
-  averageRequestDurationMs: number;
-  averageMemoryMb: number;
-  region?: string;
-  peakMultiplier?: number;
-  workloadProfile?: 'lightweight' | 'standard' | 'heavy' | 'compute';
-  apiGatewayType?: 'REST' | 'HTTP';
-  ec2InstanceType?: string;
-  minimumNodes?: number;
-  natGateway?: boolean;
-}
-
 export interface ChartEstimationParams {
   averageRequestDurationMs: number;
   averageMemoryMb: number;
@@ -91,17 +78,6 @@ export interface ChartComparisonResult {
 // API Gateway, e.g. https://<id>.execute-api.<region>.amazonaws.com/prod/api
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
-/**
- * Estimate costs for serverless and Kubernetes architectures
- */
-export async function estimateCosts(params: EstimationParams): Promise<ComparisonResult> {
-  const response = await axios.post(`${API_URL}/estimate`, params);
-  return response.data;
-}
-
-/**
- * Generate chart data for cost comparison with varying request counts
- */
 export async function generateChartData(params: ChartEstimationParams): Promise<ChartComparisonResult> {
   const response = await axios.post(`${API_URL}/estimate/chart`, params);
   return response.data;

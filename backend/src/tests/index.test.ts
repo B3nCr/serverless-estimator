@@ -11,15 +11,6 @@ describe('Express App', () => {
   });
 
   describe('API Routes', () => {
-    it('should have the estimate route configured', async () => {
-      // Send an invalid request to verify the route exists
-      // We're not testing functionality here, just that the route is configured
-      const response = await request(app).post('/api/estimate');
-      
-      // Should return 400 Bad Request (not 404 Not Found)
-      expect(response.status).toBe(400);
-    });
-    
     it('should have the chart route configured', async () => {
       // Send an invalid request to verify the route exists
       const response = await request(app).post('/api/estimate/chart');

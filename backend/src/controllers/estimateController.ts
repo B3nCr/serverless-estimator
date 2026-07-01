@@ -7,38 +7,6 @@ import logger from '../logger';
 const router = Router();
 
 /**
- * Calculate cost comparison between serverless and Kubernetes architectures
- * @route POST /api/estimate
- */
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    const params: EstimationParams = req.body;
-    
-    // Validate input parameters
-    if (!params.requestsPerMonth || !params.averageRequestDurationMs || !params.averageMemoryMb) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-    
-    // Calculate costs
-    const serverlessCost = calculateServerlessCost(params);
-    const kubernetesCost = calculateKubernetesCost(params);
-    
-    // Return comparison
-    res.json({
-      serverless: serverlessCost,
-      kubernetes: kubernetesCost,
-      difference: {
-        amount: serverlessCost.totalCost - kubernetesCost.totalCost,
-        percentage: ((serverlessCost.totalCost - kubernetesCost.totalCost) / kubernetesCost.totalCost) * 100
-      }
-    });
-  } catch (error) {
-    logger.error({ err: error }, 'Error calculating costs');
-    res.status(500).json({ error: 'Failed to calculate costs' });
-  }
-});
-
-/**
  * Generate cost comparison chart data with varying request counts
  * @route POST /api/estimate/chart
  */
